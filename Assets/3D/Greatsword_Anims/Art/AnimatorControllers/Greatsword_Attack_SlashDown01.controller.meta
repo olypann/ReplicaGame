@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fa457bdeae812f740b7ea4c7e7ec20ab
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_SlashDown01.controller
+  uploadId: 600127

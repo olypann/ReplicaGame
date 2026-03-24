@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 01a708bdffdc8cb41a8f3e5c93f7a866
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Stagger_Right.controller
+  uploadId: 600127

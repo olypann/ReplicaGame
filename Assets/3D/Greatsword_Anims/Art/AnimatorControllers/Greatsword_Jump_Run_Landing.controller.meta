@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9d1fe079024947343997237b9726fd85
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Jump_Run_Landing.controller
+  uploadId: 600127

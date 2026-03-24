@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f97dc1a4ba92e234bb7b5925a8097b48
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_QuicRamForward.controller
+  uploadId: 600127

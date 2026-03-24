@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5b4e6f94d203a724db7d331efa9c8f66
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Walk_Left.controller
+  uploadId: 600127

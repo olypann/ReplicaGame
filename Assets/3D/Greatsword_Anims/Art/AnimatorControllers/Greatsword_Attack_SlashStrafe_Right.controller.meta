@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 800b197e3f535664c8b0af61396015fb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_SlashStrafe_Right.controller
+  uploadId: 600127

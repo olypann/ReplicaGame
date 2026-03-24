@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: eaa4cd6c50e76b843ad43e49439245bf
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Block_Loop.controller
+  uploadId: 600127

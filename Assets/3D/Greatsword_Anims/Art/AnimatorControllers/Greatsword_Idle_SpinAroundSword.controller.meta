@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 32b6635dba8955248852481034c17284
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Idle_SpinAroundSword.controller
+  uploadId: 600127

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e2b9124b0ca4e134eb6613bec1feb610
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_RunSpinSlash.controller
+  uploadId: 600127

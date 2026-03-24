@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8ce1ee8e73a881b43bba057b33754c87
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Turn_Right90.controller
+  uploadId: 600127

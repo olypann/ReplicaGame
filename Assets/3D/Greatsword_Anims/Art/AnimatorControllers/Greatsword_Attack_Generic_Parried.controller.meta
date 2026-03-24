@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d9f68ac567a0c354889a6693b54f2c3c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_Generic_Parried.controller
+  uploadId: 600127

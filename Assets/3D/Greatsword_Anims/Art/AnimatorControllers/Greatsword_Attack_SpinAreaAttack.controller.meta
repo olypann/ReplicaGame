@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 97a0144361d5af54cb29f5dbe42127d9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_SpinAreaAttack.controller
+  uploadId: 600127

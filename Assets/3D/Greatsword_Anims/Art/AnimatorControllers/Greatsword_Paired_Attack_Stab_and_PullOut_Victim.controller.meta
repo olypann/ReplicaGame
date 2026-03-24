@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 38b70954ae380b646a23578ed41888e0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Paired_Attack_Stab_and_PullOut_Victim.controller
+  uploadId: 600127

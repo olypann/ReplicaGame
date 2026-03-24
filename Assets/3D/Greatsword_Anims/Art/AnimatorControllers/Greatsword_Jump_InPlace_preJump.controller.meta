@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 97e94aa2cbd76274ab9521cfa1719304
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Jump_InPlace_preJump.controller
+  uploadId: 600127

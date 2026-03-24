@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5eb5d064098a7294c88a31522d6385f2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Evade_Step_Left.controller
+  uploadId: 600127

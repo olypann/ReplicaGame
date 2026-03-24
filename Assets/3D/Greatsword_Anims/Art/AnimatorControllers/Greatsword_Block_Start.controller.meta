@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bdbd0bf6c5631e9439545757b9ef9d51
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Block_Start.controller
+  uploadId: 600127

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 85d4b50e347e14647846d0c01d1ef8db
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_ForwardSpinSlash.controller
+  uploadId: 600127

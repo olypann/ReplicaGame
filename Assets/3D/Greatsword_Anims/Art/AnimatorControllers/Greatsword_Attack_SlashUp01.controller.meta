@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 48dbe65f24a426146aa3cd9cbc65e932
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Attack_SlashUp01.controller
+  uploadId: 600127

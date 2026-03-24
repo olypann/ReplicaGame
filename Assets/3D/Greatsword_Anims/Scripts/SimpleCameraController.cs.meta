@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0c8d0160823e0eb4191a95935868ec87
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Scripts/SimpleCameraController.cs
+  uploadId: 600127

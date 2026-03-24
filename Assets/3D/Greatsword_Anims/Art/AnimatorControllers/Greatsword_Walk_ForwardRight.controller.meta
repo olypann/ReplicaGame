@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d1fede4301f00d24284dc15f11bd1b56
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Walk_ForwardRight.controller
+  uploadId: 600127

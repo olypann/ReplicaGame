@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e8a9f7a3828014c47b3ce8069eb4e0ce
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Run_BackLeft.controller
+  uploadId: 600127

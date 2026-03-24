@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b2a174281ec5e5945a5f78fe0aac94bf
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255817
+  packageName: Greatsword Anims
+  packageVersion: 1.0
+  assetPath: Assets/Greatsword_Anims/Art/AnimatorControllers/Greatsword_Block_HitReact_Medium01.controller
+  uploadId: 600127
