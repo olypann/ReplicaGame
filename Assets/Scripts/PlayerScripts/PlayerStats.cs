@@ -9,9 +9,19 @@ public class PlayerStats : MonoBehaviour
 
     private bool isDead;
 
+    [Header("Animations")]
+    private Animator animator;
+    private int animHit;
+    private int animDie;
+
     private void Start()
     {
         currentHealth = maxHealth;
+
+        animator = GetComponentInChildren<Animator>();
+
+        animHit = Animator.StringToHash("Hit");
+        animDie = Animator.StringToHash("Die");
     }
 
     public void TakeDamage(float damage)
@@ -29,6 +39,11 @@ public class PlayerStats : MonoBehaviour
         {
             Die();
         }
+
+        if (animator != null)
+        {
+            animator.SetTrigger(animHit);
+        }
     }
 
     private void Die()
@@ -42,6 +57,10 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log("Player died");
 
+        if (animator != null)
+        {
+            animator.SetTrigger(animDie);
+        }
         
     }
 

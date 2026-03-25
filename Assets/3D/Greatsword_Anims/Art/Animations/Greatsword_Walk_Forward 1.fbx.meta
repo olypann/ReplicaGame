@@ -1,18 +1,11 @@
 fileFormatVersion: 2
-guid: bc076054804ed8745a05494dc962dc88
-AssetOrigin:
-  serializedVersion: 1
-  productId: 255817
-  packageName: Greatsword Anims
-  packageVersion: 1.0
-  assetPath: Assets/Greatsword_Anims/Art/Animations/Greatsword_Jump_InPlace_Loop.fbx
-  uploadId: 600127
+guid: 90729001cefd52842b01f3e36940917d
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable:
   - first:
       74: 1827226128182048838
-    second: Greatsword_Jump_InPlace_Loop
+    second: Greatsword_Walk_Forward
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -29,9 +22,11 @@ ModelImporter:
     animationImportErrors: 
     animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
       might lower retargeting quality:\nNote: Activate translation DOF on avatar
-      to improve retargeting quality.\n\t'spine_01' has translation animation that
-      will be discarded.\n\t'neck_01' has translation animation that will be discarded.\n\t'ball_l'
-      has translation animation that will be discarded.\n"
+      to improve retargeting quality.\n\t'neck_01' has translation animation that
+      will be discarded.\n\t'foot_l' has translation animation that will be discarded.\n\t'ball_l'
+      has translation animation that will be discarded.\n\t'foot_r' has translation
+      animation that will be discarded.\n\t'ball_r' has translation animation that
+      will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -45,11 +40,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Greatsword_Jump_InPlace_Loop
+      name: Greatsword_Walk_Forward
       takeName: Take 001
       internalID: 0
       firstFrame: 0
-      lastFrame: 5
+      lastFrame: 38
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -57,7 +52,7 @@ ModelImporter:
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 1
-      loopBlend: 1
+      loopBlend: 0
       loopBlendOrientation: 1
       loopBlendPositionY: 1
       loopBlendPositionXZ: 1
@@ -892,7 +887,8 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 36fae1f62ffd9f04d8ba57546022ddb6, type: 3}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 36fae1f62ffd9f04d8ba57546022ddb6,
+    type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1

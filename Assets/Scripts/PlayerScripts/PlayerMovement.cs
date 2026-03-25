@@ -44,6 +44,13 @@ namespace StarterAssets
 
         private const float terminalVelocity = 53.0f;
 
+        [Header("Animation")]
+        public Animator animator;
+        private int animMove;
+        private int animSpeed;
+        private int animJump;
+        private int animGrounded;
+
         private void Awake()
         {
             cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
@@ -57,6 +64,12 @@ namespace StarterAssets
 
             jumpTimer = JumpTimeout;
             fallTimer = FallTimeout;
+
+            animator = GetComponentInChildren<Animator>();
+            animMove = Animator.StringToHash("Move");
+            animSpeed = Animator.StringToHash("Speed");
+            animJump = Animator.StringToHash("Jump");
+            animGrounded = Animator.StringToHash("Grounded");
         }
 
         private void Update()
@@ -156,6 +169,22 @@ namespace StarterAssets
                 moveDirection.normalized * (speed * Time.deltaTime) +
                 Vector3.up * verticalSpeed * Time.deltaTime
             );
+
+
+            //animation
+            if (animator != null)
+            {
+                animator.SetFloat(animSpeed, speed);
+
+                if (IsSprintHeld())
+                {
+                    animator.SetFloat(animMove, 2f);
+                }
+                else
+                {
+                    animator.SetFloat(animMove, 1f);
+                }
+            }
         }
 
         //jump / verticql movement
@@ -195,6 +224,18 @@ namespace StarterAssets
             {
                 verticalSpeed += Gravity * Time.deltaTime;
             }
+
+
+            //animation
+            if (IsJumpPressed() && jumpTimer <= 0f)
+            {
+                verticalSpeed = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+
+                if (animator != null)
+                {
+                    animator.SetTrigger(animJump);
+                }
+            }
         }
 
         //grounded check
@@ -213,6 +254,12 @@ namespace StarterAssets
                 GroundLayers,
                 QueryTriggerInteraction.Ignore
             );
+
+            //animation
+            if (animator != null)
+            {
+                animator.SetBool(animGrounded, Grounded);
+            }
         }
 
         //cam rotation (remove later)

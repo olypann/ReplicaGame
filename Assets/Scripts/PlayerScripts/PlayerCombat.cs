@@ -11,7 +11,8 @@ public class PlayerCombat : MonoBehaviour
     private float currentStamina;
 
     [Header("Combo System")]
-    [SerializeField] private float comboResetTime = 0.8f;
+    [SerializeField] private float combo1ResetTime = 0.6f;
+    [SerializeField] private float combo2ResetTime = 0.8f;
 
     private int comboStep = 0;
     private float comboTimer;
@@ -29,14 +30,36 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float attack3Radius = 3.2f;
     [SerializeField] private float attack3Duration = 0.6f;
 
+    [Header("Range Visual")]
+    [SerializeField] private Transform attackRangeVisual;
+
+    private bool attackQueued;
+
     [Header("Targeting")]
     [SerializeField] private LayerMask enemyLayer;
 
     private bool isAttacking;
 
+    [Header("Animations")]
+    private Animator animator;
+    private int animAttack1;
+    private int animAttack2;
+    private int animAttack3;
+
     private void Start()
     {
         currentStamina = maxStamina;
+
+        animator = GetComponentInChildren<Animator>();
+
+        animAttack1 = Animator.StringToHash("Attack1");
+        animAttack2 = Animator.StringToHash("Attack2");
+        animAttack3 = Animator.StringToHash("Attack3");
+
+        if (attackRangeVisual != null)
+        {
+            attackRangeVisual.gameObject.SetActive(false);
+        }
     }
 
     private void Update()
@@ -61,7 +84,17 @@ public class PlayerCombat : MonoBehaviour
 
     private void HandleComboTimer()
     {
-        if (comboStep > 0)
+        if (comboStep == 1)
+        {
+            comboTimer -= Time.deltaTime;
+
+            if (comboTimer <= 0f)
+            {
+                comboStep = 0;
+            }
+        }
+
+        if (comboStep == 2)
         {
             comboTimer -= Time.deltaTime;
 
@@ -84,6 +117,7 @@ public class PlayerCombat : MonoBehaviour
     {
         if (isAttacking)
         {
+            attackQueued = true;
             return;
         }
 
@@ -96,12 +130,25 @@ public class PlayerCombat : MonoBehaviour
 
         comboStep += 1;
 
-        if (comboStep > 3)
+        int nextStep = comboStep + 1;
+
+        if (nextStep > 3)
         {
-            comboStep = 1;
+            nextStep = 1;
         }
 
-        comboTimer = comboResetTime;
+        StartCoroutine(DoAttack(nextStep));
+        comboStep = nextStep;
+
+        if (comboStep == 1)
+        {
+            comboTimer = combo1ResetTime;
+        }
+
+        if (comboStep == 2)
+        {
+            comboTimer = combo2ResetTime;
+        }
 
         StartCoroutine(DoAttack(comboStep));
     }
@@ -110,6 +157,45 @@ public class PlayerCombat : MonoBehaviour
     {
         isAttacking = true;
 
+        float attackDuration = 0.4f;
+        float radius = 1f;
+
+        if (animator != null)
+        {
+            animator.ResetTrigger(animAttack1);
+            animator.ResetTrigger(animAttack2);
+            animator.ResetTrigger(animAttack3);
+
+            if (step == 1)
+            {
+                animator.SetTrigger(animAttack1);
+                attackDuration = 0.35f;
+                radius = attack1Radius;
+            }
+
+            if (step == 2)
+            {
+                animator.SetTrigger(animAttack2);
+                attackDuration = 0.45f;
+                radius = attack2Radius;
+            }
+
+            if (step == 3)
+            {
+                animator.SetTrigger(animAttack3);
+                attackDuration = attack3Duration;
+                radius = attack3Radius;
+            }
+        }
+
+        // show range visual
+        if (attackRangeVisual != null)
+        {
+            attackRangeVisual.gameObject.SetActive(true);
+            attackRangeVisual.localScale = Vector3.one * radius * 2f;
+        }
+
+        // damage
         if (step == 1)
         {
             DealDamage(attack1Damage, attack1Radius, 0.1f);
@@ -127,12 +213,45 @@ public class PlayerCombat : MonoBehaviour
             while (elapsed < attack3Duration)
             {
                 DealDamage(attack3Damage, attack3Radius, 0.1f);
+
                 elapsed += 0.1f;
                 yield return new WaitForSeconds(0.1f);
             }
         }
 
+        yield return new WaitForSeconds(attackDuration);
+
         isAttacking = false;
+
+        // hide range visual
+        if (attackRangeVisual != null)
+        {
+            attackRangeVisual.gameObject.SetActive(false);
+        }
+
+        if (attackQueued)
+        {
+            attackQueued = false;
+
+            comboStep += 1;
+
+            if (comboStep > 3)
+            {
+                comboStep = 1;
+            }
+
+            if (comboStep == 1)
+            {
+                comboTimer = combo1ResetTime;
+            }
+
+            if (comboStep == 2)
+            {
+                comboTimer = combo2ResetTime;
+            }
+
+            StartCoroutine(DoAttack(comboStep));
+        }
     }
 
     private void DealDamage(float damage, float radius, float delay)
