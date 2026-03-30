@@ -1,61 +1,86 @@
-// //using EasyTextEffects;
-// using TMPro;
-// using UnityEngine;
+using EasyTextEffects;
+using TMPro;
+using UnityEngine;
 
-// public class DamagePopup : MonoBehaviour
-// {
+public class DamagePopup : MonoBehaviour
+{
+    [Header("Settings")]
+    [SerializeField] private float moveSpeed = 1f;
+    [SerializeField] private float lifetime = 1f;
 
-//     [SerializeField] float moveSpeed = 1f;
-//     [SerializeField] float lifetime = 1f;
+    [Header("References")]
+    [SerializeField] private Transform cameraTransform;
 
-//     private TextMeshPro _damageIndicator;
-//     private Color _textColor;
-//     private Transform _cameraTransform;
+    private TextMeshPro damageText;
+    private Color textColor;
+    private float startLifetime;
 
-//     public void Setup(string damageTaken, Color textColor, bool effects)
-//     {
-//         _cameraTransform = Camera.main.transform;
-//         _damageIndicator = GetComponent<TextMeshPro>();
-        
-//         _damageIndicator.SetText($"{damageTaken}");
-        
-//         _damageIndicator.color = textColor;
-//         _textColor = _damageIndicator.color; 
-  
-//         var currentText = gameObject.GetComponent<TextEffect>(); // Easy Text Effects
-//         if (effects)
-//             currentText.StartManualEffects();
-//         else
-//             currentText.StartManualEffect("killwave");
-//     }
+    public void Setup(string damageTaken, Color color, bool effects)
+    {
+        // cache lifetime
+        startLifetime = lifetime;
 
-//     private void LateUpdate()
-//     {
-//         transform.LookAt(2 * transform.position - _cameraTransform.position);
+        // get components
+        damageText = GetComponent<TextMeshPro>();
 
-//         transform.position += new Vector3(0f, moveSpeed * Time.deltaTime, 0f);
+        // fallback camera if not set in inspector
+        if (cameraTransform == null && Camera.main != null)
+        {
+            cameraTransform = Camera.main.transform;
+        }
 
-//         lifetime -= Time.deltaTime;
-//         if (lifetime <= 0f)
-//         {
-//             _textColor.a -= 5f * Time.deltaTime;
-//             _damageIndicator.color = _textColor;
+        // set text
+        damageText.SetText(damageTaken);
+        damageText.color = color;
+        textColor = color;
 
-//             if (_textColor.a <= 0f)
-//             {
-//                 Destroy(gameObject);
-//             }         
-//         }
+        // effects
+        var textEffect = GetComponent<TextEffect>();
 
-//         if (lifetime > lifetime * 0.5f)
-//         {
-//             float incraseScaleAmount = 0.8f;
-//             transform.localScale += incraseScaleAmount * Time.deltaTime * Vector3.one;
-//         }
-//         else
-//         {
-//             float incraseScaleAmount = 0.8f;
-//             transform.localScale -= incraseScaleAmount * Time.deltaTime * Vector3.one;
-//         }
-//     }
-// }
+        if (textEffect != null)
+        {
+            if (effects)
+                textEffect.StartManualEffects();
+            else
+                textEffect.StartManualEffect("killwave");
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (cameraTransform == null)
+            return;
+
+        // face camera
+        transform.LookAt(2 * transform.position - cameraTransform.position);
+
+        // move up
+        transform.position += Vector3.up * moveSpeed * Time.deltaTime;
+
+        // lifetime
+        lifetime -= Time.deltaTime;
+
+        if (lifetime <= 0f)
+        {
+            textColor.a -= 5f * Time.deltaTime;
+            damageText.color = textColor;
+
+            if (textColor.a <= 0f)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        // scale over lifetime (fixed logic)
+        float scaleSpeed = 0.8f;
+
+        if (lifetime > startLifetime * 0.5f)
+        {
+            transform.localScale += Vector3.one * scaleSpeed * Time.deltaTime;
+        }
+        else
+        {
+            transform.localScale -= Vector3.one * scaleSpeed * Time.deltaTime;
+        }
+    }
+}

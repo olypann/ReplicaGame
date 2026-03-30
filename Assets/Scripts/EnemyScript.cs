@@ -161,10 +161,20 @@ public class EnemyScript : MonoBehaviour
 
         Debug.Log("Enemy took " + damage + " damage. HP: " + currentHealth);
 
+        DamagePopupManager.Instance.SpawnDamagePopup(
+            damage,
+            transform,
+            false, 
+            currentHealth <= 0f,
+            false,
+            false
+        );
+
         if (currentHealth <= 0f)
         {
             Die();
         }
+        
     }
 
     private void Die()

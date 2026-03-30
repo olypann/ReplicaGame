@@ -42,6 +42,15 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log("Player took " + damage + " damage. HP: " + currentHealth);
 
+        DamagePopupManager.Instance.SpawnDamagePopup(
+            damage,
+            transform,
+            true, // player hit
+            currentHealth <= 0f,
+            false,
+            false
+        );
+
         if (currentHealth <= 0f)
         {
             Die();

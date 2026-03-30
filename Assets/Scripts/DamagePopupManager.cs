@@ -1,125 +1,115 @@
-// //using EasyTextEffects;
-// using TMPro;
-// using UnityEngine;
+using TMPro;
+using UnityEngine;
 
-// public class DamagePopupManager : MonoBehaviour
-// {
-//     public static DamagePopupManager Instance;
-//     private void Awake() => Instance = this;
+public class DamagePopupManager : MonoBehaviour
+{
+    public static DamagePopupManager Instance;
 
-//     [SerializeField] GameObject _damageIndicator;
+    private void Awake()
+    {
+        Instance = this;
+    }
 
-//     [Header("Text Popups")]
-//     [SerializeField] string KillText;
-//     [SerializeField] string WeakText;
-//     [SerializeField] string ResText;
-//     [SerializeField] int popUpSortingOrder = 1; // 1 being in front of everything
-    
-//     [Header("Colours")]
-//     [SerializeField] Color Neutral;
-//     [SerializeField] Color Fire;
-//     [SerializeField] Color Water;
-//     [SerializeField] Color Earth;
-//     [SerializeField] Color Electricity;
-//     [SerializeField] Color Air;
-//     [SerializeField] Color Ice;
-//     [SerializeField] Color Light;
-//     [SerializeField] Color Dark;
-//     [SerializeField] Color Poison;
-    
-//     [SerializeField] Color WeakColor;
-//     [SerializeField] Color ResColor;
-    
-//     private Color textColor;
+    [SerializeField] private GameObject damagePopupPrefab;
 
-//     public void SpawnDamageIndicator(float damageTaken, Transform parent, Element damageType, bool Kill, bool Weak, bool Res)
-//     {
-//         damageTaken = (int)damageTaken;
-//         if (damageTaken <= 0) return;
-//         float randomPosx = Random.Range(-1f, 1f);
-//         float randomPosy = Random.Range(0.1f, 0.5f);
+    [Header("Text")]
+    [SerializeField] private string killText;
+    [SerializeField] private string weakText;
+    [SerializeField] private string resText;
 
-//         float randomScale = Random.Range(1f, 2f);
+    [Header("Colors")]
+    [SerializeField] private Color playerHitColor;
+    [SerializeField] private Color enemyHitColor;
+    [SerializeField] private Color highDamageColor;
+    [SerializeField] private Color weakColor;
+    [SerializeField] private Color resColor;
 
-//         #region DamageTypeStack
+    [Header("Settings")]
+    [SerializeField] private float highDamageThreshold = 20f;
+    [SerializeField] private int sortingOrder = 1;
 
-//         switch (damageType)
-//         {
-//             case Element.None:
-//                 textColor = Neutral;
-//                 break;
-//             case Element.Fire:
-//                 textColor = Fire;
-//                 break;
-//             case Element.Water:
-//                 textColor = Water;
-//                 break;
-//             case Element.Earth:
-//                 textColor = Earth;
-//                 break;
-//             case Element.Electricity:
-//                 textColor = Electricity;
-//                 break;
-//             case Element.Air:
-//                 textColor = Air;
-//                 break;
-//             case Element.Ice:
-//                 textColor = Ice;
-//                 break;
-//             case Element.Light:
-//                 textColor = Light;
-//                 break;
-//             case Element.Dark:
-//                 textColor = Dark;
-//                 break;
-//             case Element.Poison:
-//                 textColor = Poison;
-//                 break;
-//         }
+    public void SpawnDamagePopup(float damage, Transform target, bool isPlayerHit, bool isKill, bool isWeak, bool isRes)
+    {
+        if (damage <= 0f || damagePopupPrefab == null || target == null)
+        {
+            return;
+        }
 
-//         #endregion
+        float randomX = Random.Range(-1f, 1f);
+        float randomY = Random.Range(0.1f, 0.5f);
 
-//         GameObject _dmg_ = Instantiate(_damageIndicator, 
-//             new Vector3(parent.transform.position.x + randomPosx, parent.transform.position.y + randomPosy, parent.transform.position.z), Quaternion.identity);
+        Vector3 spawnPos = new Vector3(
+            target.position.x + randomX,
+            target.position.y + randomY,
+            target.position.z
+        );
 
-//         _dmg_.GetComponent<TextMeshPro>().fontSize *= randomScale;
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+        //popup.GetComponent<DamagePopup>().SetCamera(Camera.main.transform);
 
-//         if (Kill) // Kill Text
-//         {
-//             _dmg_.GetComponent<DamageIndicator>().Setup($"{KillText}<br><br> ", Color.red, true);
-//             _dmg_.GetComponent<TextMeshPro>().sortingOrder = popUpSortingOrder;
-            
-//         }
-//         else // Normal Dmg
-//         {
-//             _dmg_.GetComponent<DamageIndicator>().Setup(damageTaken.ToString(), textColor, false);
-//         }
+        TextMeshPro text = popup.GetComponent<TextMeshPro>();
+        DamagePopup popupScript = popup.GetComponent<DamagePopup>();
 
-//         if (Weak) // Weak text
-//         {
-//             GameObject _dmgweak_ = Instantiate(_damageIndicator,
-//                 new Vector3(parent.transform.position.x + randomPosx, parent.transform.position.y + randomPosy, parent.transform.position.z), Quaternion.identity);
-            
-//             _dmgweak_.GetComponent<TextMeshPro>().fontSize *= randomScale;
-//             _dmgweak_.GetComponent<DamageIndicator>().Setup($"{WeakText}<br><br> ", WeakColor, false);
- 
-//             _dmgweak_.GetComponent<TextMeshPro>().sortingOrder = popUpSortingOrder;
-//         }
+        float finalDamage = Mathf.FloorToInt(damage);
 
-//         if (Res) // Resistant text
-//         {
-//             GameObject _dmgres_ = Instantiate(_damageIndicator,
-//                     new Vector3(parent.transform.position.x + randomPosx, parent.transform.position.y + randomPosy, parent.transform.position.z), Quaternion.identity);
+        // base color
+        Color color = isPlayerHit ? playerHitColor : enemyHitColor;
 
-//             _dmgres_.GetComponent<TextMeshPro>().fontSize *= randomScale;
-//             _dmgres_.GetComponent<DamageIndicator>().Setup($"{ResText}<br><br> ", ResColor, false);
+        // high damage override
+        if (finalDamage >= highDamageThreshold)
+        {
+            color = highDamageColor;
+        }
 
-//             _dmgres_.GetComponent<TextMeshPro>().sortingOrder = popUpSortingOrder;
-//         }
+        // kill text
+        if (isKill)
+        {
+            popupScript.Setup($"{killText}", Color.red, true);
+        }
+        else
+        {
+            popupScript.Setup(finalDamage.ToString(), color, false);
+        }
 
-//         if (damageTaken >= 15f) // Bigger number == bigger number
-//         {
-//             _dmg_.GetComponent<TextMeshPro>().fontSize *= damageTaken / 15f;
-//         }
-//     }
-// }
+        text.sortingOrder = sortingOrder;
+
+        // weak popup
+        if (isWeak)
+        {
+            SpawnExtraText(target, weakText, weakColor);
+        }
+
+        // resist popup
+        if (isRes)
+        {
+            SpawnExtraText(target, resText, resColor);
+        }
+
+        // scale with damage
+        if (finalDamage >= highDamageThreshold)
+        {
+            text.fontSize *= finalDamage / highDamageThreshold;
+        }
+    }
+
+    private void SpawnExtraText(Transform target, string message, Color color)
+    {
+        float randomX = Random.Range(-1f, 1f);
+        float randomY = Random.Range(0.1f, 0.5f);
+
+        Vector3 spawnPos = new Vector3(
+            target.position.x + randomX,
+            target.position.y + randomY,
+            target.position.z
+        );
+
+        GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+
+        TextMeshPro text = popup.GetComponent<TextMeshPro>();
+        DamagePopup popupScript = popup.GetComponent<DamagePopup>();
+
+        popupScript.Setup($"{message}", color, false);
+
+        text.sortingOrder = sortingOrder;
+    }
+}
