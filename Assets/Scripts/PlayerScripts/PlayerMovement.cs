@@ -46,7 +46,6 @@ namespace StarterAssets
 
         [Header("Animation")]
         public Animator animator;
-        private int animMove;
         private int animSpeed;
         private int animJump;
         private int animGrounded;
@@ -66,7 +65,6 @@ namespace StarterAssets
             fallTimer = FallTimeout;
 
             animator = GetComponentInChildren<Animator>();
-            animMove = Animator.StringToHash("Move");
             animSpeed = Animator.StringToHash("Speed");
             animJump = Animator.StringToHash("Jump");
             animGrounded = Animator.StringToHash("Grounded");
@@ -77,7 +75,6 @@ namespace StarterAssets
             GroundCheck();
             Jump();
             Movement();
-
         }
 
         private void LateUpdate()
@@ -85,7 +82,7 @@ namespace StarterAssets
             CameraRotation();
         }
 
-        //player input
+        //input
 
         private Vector2 GetMoveInput()
         {
@@ -111,7 +108,7 @@ namespace StarterAssets
             return Input.GetKey(KeyCode.LeftShift);
         }
 
-        //character movement
+        //movement
 
         private void Movement()
         {
@@ -134,7 +131,17 @@ namespace StarterAssets
             }
 
             float currentSpeed = new Vector3(controller.velocity.x, 0f, controller.velocity.z).magnitude;
-            float inputMagnitude = moveInput.magnitude;
+
+            float inputMagnitude;
+
+            if (moveInput.magnitude > 0f)
+            {
+                inputMagnitude = 1f;
+            }
+            else
+            {
+                inputMagnitude = 0f;
+            }
 
             float speedOffset = 0.1f;
 
@@ -170,24 +177,21 @@ namespace StarterAssets
                 Vector3.up * verticalSpeed * Time.deltaTime
             );
 
-
             //animation
             if (animator != null)
             {
-                animator.SetFloat(animSpeed, speed);
+                float normalizedSpeed = speed / sprintSpeed;
 
-                if (IsSprintHeld())
+                if (normalizedSpeed < 0.05f)
                 {
-                    animator.SetFloat(animMove, 2f);
+                    normalizedSpeed = 0f;
                 }
-                else
-                {
-                    animator.SetFloat(animMove, 1f);
-                }
+
+                animator.SetFloat(animSpeed, normalizedSpeed);
             }
         }
 
-        //jump / verticql movement
+        //jump
 
         private void Jump()
         {
@@ -203,6 +207,11 @@ namespace StarterAssets
                 if (IsJumpPressed() && jumpTimer <= 0f)
                 {
                     verticalSpeed = Mathf.Sqrt(JumpHeight * -2f * Gravity);
+
+                    if (animator != null)
+                    {
+                        animator.SetTrigger(animJump);
+                    }
                 }
 
                 if (jumpTimer > 0f)
@@ -224,21 +233,9 @@ namespace StarterAssets
             {
                 verticalSpeed += Gravity * Time.deltaTime;
             }
-
-
-            //animation
-            if (IsJumpPressed() && jumpTimer <= 0f)
-            {
-                verticalSpeed = Mathf.Sqrt(JumpHeight * -2f * Gravity);
-
-                if (animator != null)
-                {
-                    animator.SetTrigger(animJump);
-                }
-            }
         }
 
-        //grounded check
+        //ground
 
         private void GroundCheck()
         {
@@ -255,14 +252,13 @@ namespace StarterAssets
                 QueryTriggerInteraction.Ignore
             );
 
-            //animation
             if (animator != null)
             {
                 animator.SetBool(animGrounded, Grounded);
             }
         }
 
-        //cam rotation (remove later)
+        //camera
 
         private void CameraRotation()
         {

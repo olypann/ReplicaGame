@@ -132,6 +132,12 @@ public class EnemyScript : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
 
+        PlayerCombat combat = playerStats.GetComponent<PlayerCombat>();
+        if (combat != null && combat.IsInvulnerable())
+        {
+            yield break;
+        }
+
         if (playerStats != null)
         {
             playerStats.TakeDamage(attackDamage);

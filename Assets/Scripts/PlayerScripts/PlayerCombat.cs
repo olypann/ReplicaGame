@@ -19,32 +19,30 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("Attack 1")]
     [SerializeField] private float attack1Damage = 10f;
-    [SerializeField] private float attack1Radius = 1.5f;
 
     [Header("Attack 2")]
     [SerializeField] private float attack2Damage = 18f;
-    [SerializeField] private float attack2Radius = 2.2f;
 
     [Header("Attack 3")]
     [SerializeField] private float attack3Damage = 30f;
-    [SerializeField] private float attack3Radius = 3.2f;
     [SerializeField] private float attack3Duration = 0.6f;
 
-    [Header("Range Visual")]
-    [SerializeField] private Transform attackRangeVisual;
-
     private bool attackQueued;
-
-    [Header("Targeting")]
-    [SerializeField] private LayerMask enemyLayer;
-
     private bool isAttacking;
+    private bool canCombo;
+
+    public int currentAttackStep;
+    public float currentAttackDamage;
+
+    private bool isInvulnerable;
 
     [Header("Animations")]
     private Animator animator;
     private int animAttack1;
     private int animAttack2;
     private int animAttack3;
+
+    private WeaponScript weaponHitbox;
 
     private void Start()
     {
@@ -56,10 +54,7 @@ public class PlayerCombat : MonoBehaviour
         animAttack2 = Animator.StringToHash("Attack2");
         animAttack3 = Animator.StringToHash("Attack3");
 
-        if (attackRangeVisual != null)
-        {
-            attackRangeVisual.gameObject.SetActive(false);
-        }
+        weaponHitbox = GetComponentInChildren<WeaponScript>();
     }
 
     private void Update()
@@ -72,36 +67,19 @@ public class PlayerCombat : MonoBehaviour
     private void HandleStamina()
     {
         if (currentStamina < maxStamina)
-        {
             currentStamina += staminaRegenRate * Time.deltaTime;
-        }
 
-        if (currentStamina > maxStamina)
-        {
-            currentStamina = maxStamina;
-        }
+        currentStamina = Mathf.Min(currentStamina, maxStamina);
     }
 
     private void HandleComboTimer()
     {
-        if (comboStep == 1)
+        if (comboStep == 1 || comboStep == 2)
         {
             comboTimer -= Time.deltaTime;
 
             if (comboTimer <= 0f)
-            {
                 comboStep = 0;
-            }
-        }
-
-        if (comboStep == 2)
-        {
-            comboTimer -= Time.deltaTime;
-
-            if (comboTimer <= 0f)
-            {
-                comboStep = 0;
-            }
         }
     }
 
@@ -109,46 +87,35 @@ public class PlayerCombat : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            if (isAttacking)
+            {
+                if (canCombo)
+                    attackQueued = true;
+
+                return;
+            }
+
             TryAttack();
         }
     }
 
     private void TryAttack()
     {
-        if (isAttacking)
-        {
-            attackQueued = true;
-            return;
-        }
-
         if (currentStamina < lightAttackCost)
-        {
             return;
-        }
 
         currentStamina -= lightAttackCost;
 
-        comboStep += 1;
+        comboStep++;
 
-        int nextStep = comboStep + 1;
-
-        if (nextStep > 3)
-        {
-            nextStep = 1;
-        }
-
-        StartCoroutine(DoAttack(nextStep));
-        comboStep = nextStep;
+        if (comboStep > 3)
+            comboStep = 1;
 
         if (comboStep == 1)
-        {
             comboTimer = combo1ResetTime;
-        }
 
         if (comboStep == 2)
-        {
             comboTimer = combo2ResetTime;
-        }
 
         StartCoroutine(DoAttack(comboStep));
     }
@@ -156,9 +123,17 @@ public class PlayerCombat : MonoBehaviour
     private IEnumerator DoAttack(int step)
     {
         isAttacking = true;
+        attackQueued = false;
+        canCombo = false;
+
+        currentAttackStep = step;
+
+        if (weaponHitbox != null)
+            weaponHitbox.ResetHits();
+
+        isInvulnerable = false;
 
         float attackDuration = 0.4f;
-        float radius = 1f;
 
         if (animator != null)
         {
@@ -169,110 +144,54 @@ public class PlayerCombat : MonoBehaviour
             if (step == 1)
             {
                 animator.SetTrigger(animAttack1);
+                currentAttackDamage = attack1Damage;
                 attackDuration = 0.35f;
-                radius = attack1Radius;
             }
-
-            if (step == 2)
+            else if (step == 2)
             {
                 animator.SetTrigger(animAttack2);
+                currentAttackDamage = attack2Damage;
                 attackDuration = 0.45f;
-                radius = attack2Radius;
             }
-
-            if (step == 3)
+            else if (step == 3)
             {
                 animator.SetTrigger(animAttack3);
+                currentAttackDamage = attack3Damage;
                 attackDuration = attack3Duration;
-                radius = attack3Radius;
+
+                isInvulnerable = true;
             }
         }
 
-        // show range visual
-        if (attackRangeVisual != null)
-        {
-            attackRangeVisual.gameObject.SetActive(true);
-            attackRangeVisual.localScale = Vector3.one * radius * 2f;
-        }
 
-        // damage
-        if (step == 1)
-        {
-            DealDamage(attack1Damage, attack1Radius, 0.1f);
-        }
+        yield return new WaitForSeconds(attackDuration * 0.5f);
+        canCombo = true;
 
-        if (step == 2)
-        {
-            DealDamage(attack2Damage, attack2Radius, 0.15f);
-        }
-
-        if (step == 3)
-        {
-            float elapsed = 0f;
-
-            while (elapsed < attack3Duration)
-            {
-                DealDamage(attack3Damage, attack3Radius, 0.1f);
-
-                elapsed += 0.1f;
-                yield return new WaitForSeconds(0.1f);
-            }
-        }
-
-        yield return new WaitForSeconds(attackDuration);
+    
+        yield return new WaitForSeconds(attackDuration * 0.5f);
 
         isAttacking = false;
-
-        // hide range visual
-        if (attackRangeVisual != null)
-        {
-            attackRangeVisual.gameObject.SetActive(false);
-        }
+        isInvulnerable = false;
 
         if (attackQueued)
         {
             attackQueued = false;
-
-            comboStep += 1;
-
-            if (comboStep > 3)
-            {
-                comboStep = 1;
-            }
-
-            if (comboStep == 1)
-            {
-                comboTimer = combo1ResetTime;
-            }
-
-            if (comboStep == 2)
-            {
-                comboTimer = combo2ResetTime;
-            }
-
-            StartCoroutine(DoAttack(comboStep));
+            TryAttack();
         }
     }
 
-    private void DealDamage(float damage, float radius, float delay)
+    public bool IsAttacking()
     {
-        StartCoroutine(DamageTick(damage, radius, delay));
+        return isAttacking;
     }
 
-    private IEnumerator DamageTick(float damage, float radius, float delay)
+    public float GetCurrentDamage()
     {
-        yield return new WaitForSeconds(delay);
+        return currentAttackDamage;
+    }
 
-        Collider[] hits = Physics.OverlapSphere(transform.position, radius, enemyLayer);
-
-        foreach (Collider hit in hits)
-        {
-            EnemyScript enemy = hit.GetComponent<EnemyScript>();
-
-            if (enemy != null)
-            {
-                enemy.TakeDamage(damage);
-            }
-        }
+    public bool IsInvulnerable()
+    {
+        return isInvulnerable;
     }
 }

@@ -26,6 +26,13 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
+        PlayerCombat combat = GetComponent<PlayerCombat>();
+
+        if (combat != null && combat.IsInvulnerable())
+        {
+            return;
+        }
+        
         if (isDead)
         {
             return;

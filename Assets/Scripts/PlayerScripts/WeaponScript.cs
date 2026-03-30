@@ -1,0 +1,35 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class WeaponScript : MonoBehaviour
+{
+    [SerializeField] private PlayerCombat playerCombat;
+
+    private HashSet<EnemyScript> hitEnemies = new HashSet<EnemyScript>();
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (playerCombat == null)
+        {
+            return;
+        }
+
+        if (!playerCombat.IsAttacking())
+        {
+            return;
+        }
+
+        EnemyScript enemy = other.GetComponent<EnemyScript>();
+
+        if (enemy != null && !hitEnemies.Contains(enemy))
+        {
+            hitEnemies.Add(enemy);
+            enemy.TakeDamage(playerCombat.GetCurrentDamage());
+        }
+    }
+
+    public void ResetHits()
+    {
+        hitEnemies.Clear();
+    }
+}
