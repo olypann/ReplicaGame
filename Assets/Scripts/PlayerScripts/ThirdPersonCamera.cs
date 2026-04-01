@@ -10,6 +10,8 @@ public class ThirdPersonCamera : MonoBehaviour
     public float mouseSensitivity = 3f;
     public float smoothSpeed = 10f;
 
+    public LayerMask groundLayer;
+
     private float yaw;
     private float pitch = 10f;
 
@@ -21,14 +23,30 @@ public class ThirdPersonCamera : MonoBehaviour
     private void LateUpdate()
     {
         if (target == null)
-        {
             return;
+
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+        yaw += mouseX;
+
+        // try applying pitch first
+        float newPitch = pitch - mouseY;
+        newPitch = Mathf.Clamp(newPitch, -80f, 60f);
+
+        // simulate camera position with this pitch
+        Quaternion testRotation = Quaternion.Euler(newPitch, yaw, 0);
+        Vector3 testOffset = testRotation * new Vector3(0, height, -distance);
+        Vector3 testPosition = target.position + testOffset;
+
+        // check if line of sight is blocked
+        Vector3 direction = testPosition - target.position;
+        float distanceToTarget = direction.magnitude;
+
+        if (!Physics.Raycast(target.position, direction.normalized, distanceToTarget, groundLayer))
+        {
+            pitch = newPitch;
         }
-
-        yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
-        pitch -= Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-        pitch = Mathf.Clamp(pitch, -30f, 60f);
 
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
 
