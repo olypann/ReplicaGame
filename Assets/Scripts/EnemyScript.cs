@@ -19,6 +19,7 @@ public class EnemyScript : MonoBehaviour
 
     [Header("Health")]
     [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private Unity.UI.Shaders.Sample.CustomSlider healthSlider;
 
     private float currentHealth;
     private float cooldownTimer;
@@ -26,12 +27,22 @@ public class EnemyScript : MonoBehaviour
     private bool isDead;
     private bool isAttacking;
 
+    [SerializeField] private float uiSmoothSpeed = 8f;
+
+    private float healthVisual;
+
     private void Start()
     {
         
         currentHealth = maxHealth;
 
-       
+       if (healthSlider != null)
+        {
+            float normalized = currentHealth / maxHealth;
+            healthSlider.SetValue(normalized);
+        }
+
+        healthVisual = currentHealth / maxHealth;
 
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
 
@@ -81,6 +92,20 @@ public class EnemyScript : MonoBehaviour
         else
         {
             AttackPlayer();
+        }
+
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        float target = currentHealth / maxHealth;
+
+        healthVisual = Mathf.Lerp(healthVisual, target, Time.deltaTime * uiSmoothSpeed);
+
+        if (healthSlider != null)
+        {
+            healthSlider.SetValue(healthVisual);
         }
     }
 

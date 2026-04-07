@@ -6,6 +6,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private float maxHealth = 100f;
 
     private float currentHealth;
+    [SerializeField] private Unity.UI.Shaders.Sample.Meter healthMeter;
 
     private bool isDead;
 
@@ -17,6 +18,12 @@ public class PlayerStats : MonoBehaviour
     private void Start()
     {
         currentHealth = maxHealth;
+
+        if (healthMeter != null)
+        {
+            float normalized = currentHealth / maxHealth;
+            healthMeter.SetValue(normalized);
+        }
 
         animator = GetComponentInChildren<Animator>();
 
@@ -39,6 +46,12 @@ public class PlayerStats : MonoBehaviour
         }
 
         currentHealth -= damage;
+
+        if (healthMeter != null)
+        {
+            float normalized = currentHealth / maxHealth;
+            healthMeter.SetValue(normalized);
+        }
 
         Debug.Log("Player took " + damage + " damage. HP: " + currentHealth);
 

@@ -7,6 +7,8 @@ public class WeaponScript : MonoBehaviour
 
     private HashSet<EnemyScript> hitEnemies = new HashSet<EnemyScript>();
 
+    
+
     private void OnTriggerEnter(Collider other)
     {
         if (playerCombat == null)
@@ -25,6 +27,8 @@ public class WeaponScript : MonoBehaviour
         {
             hitEnemies.Add(enemy);
             enemy.TakeDamage(playerCombat.GetCurrentDamage());
+
+            playerCombat.AddAbilityCharge(playerCombat.abilityGainPerHit);
         }
     }
 

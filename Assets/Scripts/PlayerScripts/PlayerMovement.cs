@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
             animator.applyRootMotion = false;
         }
 
-        // cache animator hashes
+        // animator
         animSpeed = Animator.StringToHash("Speed");
         animJump = Animator.StringToHash("Jump");
         animGrounded = Animator.StringToHash("Grounded");
@@ -95,7 +95,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        // main loop
         GroundCheck();
         NearGroundCheck();
         Jump();
@@ -104,12 +103,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void LateUpdate()
     {
-        // camera update
         CameraRotation();
     }
 
-    // INPUT
-
+    // playe rinput
     private Vector2 GetMoveInput()
     {
         return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -130,7 +127,7 @@ public class PlayerMovement : MonoBehaviour
         return Input.GetKey(KeyCode.LeftShift);
     }
 
-    // MOVEMENT
+    // movement
 
     private void Movement()
     {
@@ -201,7 +198,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // JUMP
+    // jump
 
     private void Jump()
     {
@@ -245,7 +242,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // GROUND CHECK
+    // griund check
 
     private void GroundCheck()
     {

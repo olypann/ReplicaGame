@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: UI_UnscaledAnimOutlineMat
-  m_Shader: {fileID: 4800000, guid: b6cfa9cba9d345e4aa9af3a6ff70c4e0, type: 3}
+  m_Shader: {fileID: 4800000, guid: c1281a58884b7b54aaefbf1312da8e63, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -29,7 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _OutlineDot: 10
+    - _OutlineDot: 6.96
     - _OutlineDot2: 0.74
     - _OutlineSpeed: 1
     - _OutlineThickness: 7.64

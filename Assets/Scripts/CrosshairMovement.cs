@@ -6,7 +6,7 @@ public class CustomCrosshair : MonoBehaviour
     public Transform cam;
 
     public float followSpeed = 10f;
-    public float offsetFromPlayer = 0.8f; // how far in front of player (toward camera)
+    public float offsetFromPlayer = 0.8f; // how far in front of player
 
     private enum Mode
     {
