@@ -59,6 +59,30 @@ public class PlayerMovement : MonoBehaviour
     private int animJump;
     private int animGrounded;
 
+    [Header("Dodge")]
+    [SerializeField] private float dodgeSpeed = 12f;
+    [SerializeField] private float dodgeDuration = 0.2f;
+    [SerializeField] private float doubleTapTime = 0.25f;
+    [SerializeField] private float dodgeStaminaCost = 15f;
+
+    [Header("Dodge VFX")]
+    [SerializeField] private GameObject dodgeVFX;
+    [SerializeField] private Transform dodgeVFXSpawnPoint;
+
+    private float lastATapTime;
+    private float lastDTapTime;
+    private float lastSTapTime;
+    private float lastWTapTime;
+
+    private bool isDodging;
+    private float dodgeTimer;
+    private Vector3 dodgeDirection;
+
+    private int animDodgeLeft;
+    private int animDodgeRight;
+    private int animDodgeForward;
+    private int animDodgeBack;
+
     private void Awake()
     {
         // find main camera reference
@@ -91,6 +115,11 @@ public class PlayerMovement : MonoBehaviour
         animNearGround = Animator.StringToHash("NearGround");
         animLand = Animator.StringToHash("Land");
         animHardLand = Animator.StringToHash("HardLand");
+
+        animDodgeLeft = Animator.StringToHash("DodgeLeft");
+        animDodgeRight = Animator.StringToHash("DodgeRight");
+        animDodgeForward = Animator.StringToHash("DodgeForward");
+        animDodgeBack = Animator.StringToHash("DodgeBack");
     }
 
     private void Update()
@@ -99,6 +128,7 @@ public class PlayerMovement : MonoBehaviour
         NearGroundCheck();
         Jump();
         Movement();
+        HandleDodge();
     }
 
     private void LateUpdate()
@@ -131,6 +161,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
+        if (isDodging)
+        {
+            return;
+        }
+
         Vector2 moveInput = GetMoveInput();
 
         // lock movement during attack
@@ -198,6 +233,165 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void HandleDodge()
+    {
+        if (isDodging)
+        {
+            dodgeTimer -= Time.deltaTime;
+
+            if (dodgeTimer <= 0f)
+            {
+                isDodging = false;
+            }
+
+            controller.Move(dodgeDirection * dodgeSpeed * Time.deltaTime);
+            return;
+        }
+
+        if (combat != null && combat.IsAttacking())
+        {
+            return;
+        }
+
+        // a key (left)
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            if (Time.time - lastATapTime <= doubleTapTime)
+            {
+                TryDodge(-cameraObject.transform.right);
+            }
+
+            lastATapTime = Time.time;
+        }
+
+        // d key (right)
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            if (Time.time - lastDTapTime <= doubleTapTime)
+            {
+                TryDodge(cameraObject.transform.right);
+            }
+
+            lastDTapTime = Time.time;
+        }
+
+        // s key (backwards)
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            if (Time.time - lastSTapTime <= doubleTapTime)
+            {
+                TryDodge(-cameraObject.transform.forward);
+            }
+
+            lastSTapTime = Time.time;
+        }
+
+        // w key (forward)
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            if (Time.time - lastWTapTime <= doubleTapTime)
+            {
+                TryDodge(cameraObject.transform.forward);
+            }
+
+            lastWTapTime = Time.time;
+        }
+    }
+
+    private void TryDodge(Vector3 direction)
+    {
+        if (combat != null)
+        {
+            if (combat.currentStamina < dodgeStaminaCost)
+            {
+                return;
+            }
+
+            combat.currentStamina -= dodgeStaminaCost;
+        }
+
+        StartDodge(direction);
+    }
+
+    private void StartDodge(Vector3 direction)
+    {
+        isDodging = true;
+        dodgeTimer = dodgeDuration;
+
+        direction.y = 0f;
+        dodgeDirection = direction.normalized;
+
+        PlayDodgeVFX(dodgeDirection);
+        PlayDodgeAnimation(dodgeDirection);
+
+        ThirdPersonCamera cam = cameraObject.GetComponent<ThirdPersonCamera>();
+
+        if (cam != null)
+        {
+            cam.AddDodgeImpulse(dodgeDirection);
+        }
+    }
+
+    private void PlayDodgeVFX(Vector3 dir)
+    {
+        if (dodgeVFX == null)
+        {
+            return;
+        }
+
+        if (dodgeVFXSpawnPoint == null)
+        {
+            return;
+        }
+
+        Vector3 spawnDir = -dir.normalized;
+
+        GameObject vfx = Instantiate(
+            dodgeVFX,
+            dodgeVFXSpawnPoint.position,
+            Quaternion.LookRotation(spawnDir)
+        );
+
+        // cleans itself up after a short time
+        Destroy(vfx, 1.0f);
+    }
+
+    private void PlayDodgeAnimation(Vector3 dir)
+    {
+        if (animator == null)
+        {
+            return;
+        }
+
+        Vector3 localDir = transform.InverseTransformDirection(dir);
+
+        float x = localDir.x;
+        float z = localDir.z;
+
+        if (Mathf.Abs(x) > Mathf.Abs(z))
+        {
+            if (x > 0f)
+            {
+                animator.SetTrigger(animDodgeRight);
+            }
+            else
+            {
+                animator.SetTrigger(animDodgeLeft);
+            }
+        }
+        else
+        {
+            if (z > 0f)
+            {
+                animator.SetTrigger(animDodgeForward);
+            }
+            else
+            {
+                animator.SetTrigger(animDodgeBack);
+            }
+        }
+    }
+
     // jump
 
     private void Jump()
@@ -219,6 +413,8 @@ public class PlayerMovement : MonoBehaviour
                 {
                     animator.SetTrigger(animJump);
                 }
+
+                SoundManager.Instance?.PlayJump();
             }
 
             if (jumpTimer > 0f)
