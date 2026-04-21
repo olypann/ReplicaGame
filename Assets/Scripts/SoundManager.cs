@@ -5,11 +5,19 @@ public class SoundManager : MonoBehaviour
     public static SoundManager Instance;
 
     [Header("Player Movement")]
-    [SerializeField] private AudioSource footstepWalk;
-    [SerializeField] private AudioSource footstepRun;
     [SerializeField] private AudioSource jump;
     [SerializeField] private AudioSource land;
     [SerializeField] private AudioSource dodge;
+
+    [Header("Footsteps")]
+    [SerializeField] private AudioSource footstepSource;
+    [SerializeField] private AudioClip[] footstepClips;
+
+    [SerializeField] private float walkStepDelay = 0.5f;
+    [SerializeField] private float runStepDelay = 0.3f;
+
+    private float footstepTimer;
+    private int lastFootstepIndex = -1;
 
     [Header("Combat - Attacks")]
     [SerializeField] private AudioSource attack1Swing;
@@ -44,9 +52,51 @@ public class SoundManager : MonoBehaviour
         Instance = this;
     }
 
+    // footsteps
+    public void HandleFootsteps(float speedNormalized, bool isMoving)
+    {
+        if (!isMoving)
+        {
+            footstepTimer = 0f;
+            return;
+        }
+
+        float stepDelay = Mathf.Lerp(walkStepDelay, runStepDelay, speedNormalized);
+
+        footstepTimer -= Time.deltaTime;
+
+        if (footstepTimer > 0f)
+        {
+            return;
+        }
+
+        footstepTimer = stepDelay;
+
+        PlayRandomFootstep();
+    }
+
+    private void PlayRandomFootstep()
+    {
+        if (footstepClips.Length == 0 || footstepSource == null)
+        {
+            return;
+        }
+
+        int index = Random.Range(0, footstepClips.Length);
+
+        if (index == lastFootstepIndex)
+        {
+            index = (index + 1) % footstepClips.Length;
+        }
+
+        lastFootstepIndex = index;
+
+        footstepSource.pitch = Random.Range(0.9f, 1.1f);
+
+        footstepSource.PlayOneShot(footstepClips[index]);
+    }
+
     // movement
-    public void PlayFootstepWalk() => footstepWalk?.Play();
-    public void PlayFootstepRun() => footstepRun?.Play();
     public void PlayJump() => jump?.Play();
     public void PlayLand() => land?.Play();
     public void PlayDodge() => dodge?.Play();

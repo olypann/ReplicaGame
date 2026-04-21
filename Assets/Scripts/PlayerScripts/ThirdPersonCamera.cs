@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class ThirdPersonCamera : MonoBehaviour
@@ -11,6 +12,10 @@ public class ThirdPersonCamera : MonoBehaviour
     public float smoothSpeed = 10f;
 
     public LayerMask groundLayer;
+    [Header("Camera Obstacle")]
+    [SerializeField] private float obstacleRadius = 0.25f;
+    [SerializeField] private float obstacleBuffer = 0.1f;
+    [SerializeField] private LayerMask obstacleLayers;
 
     [Header("Dodge Impulse")]
     [SerializeField] private float forwardImpulse = 0.35f;
@@ -21,8 +26,47 @@ public class ThirdPersonCamera : MonoBehaviour
     [SerializeField] private float impulseReturnSpeed = 10f;
     [SerializeField] private float overshootStrength = 0.15f;
 
+    [Header("Charge Zoom")]
+    [SerializeField] private float chargeZoomFOV = 55f;
+    [SerializeField] private float normalFOV = 60f;
+    [SerializeField] private float zoomSmoothSpeed = 6f;
+
+    [SerializeField] private float chargedAttackKickFOV = 50f;
+    [SerializeField] private float kickReturnSpeed = 10f;
+
+    [Header("Dynamic Camera - Distance")]
+    [SerializeField] private float normalDistance = 3.5f;
+    [SerializeField] private float sprintDistance = 4.2f;
+    [SerializeField] private float combatDistance = 3.0f;
+
+    [SerializeField] private float distanceSmooth = 8f;
+
+    [Header("Dynamic Camera - Height")]
+    [SerializeField] private float normalHeight = 1.5f;
+    [SerializeField] private float combatHeight = 1.3f;
+
+    [SerializeField] private float heightSmooth = 8f;
+
+    private bool isCharging;
+    private bool doChargeKick;
+    private float currentFOVVelocity;
+
+    [Header("Subtle Motion")]
+    [SerializeField] private float swayAmount = 0.05f;
+    [SerializeField] private float swaySpeed = 1.5f;
+
+    [SerializeField] private float breatheAmount = 0.03f;
+    [SerializeField] private float breatheSpeed = 1.2f;
+    private float motionTime;
+
     private Vector3 dodgeImpulse;
     private Vector3 overshootVelocity;
+
+    private float targetDistance;
+    private float targetHeight;
+
+    private PlayerCombat combat;
+    private PlayerMovement movement;
 
     private float yaw;
     private float pitch = 10f;
@@ -33,6 +77,9 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         lastPosition = transform.position;
+
+        combat = target.GetComponent<PlayerCombat>();
+        movement = target.GetComponent<PlayerMovement>();
     }
 
     private void LateUpdate()
@@ -49,6 +96,10 @@ public class ThirdPersonCamera : MonoBehaviour
 
         float newPitch = pitch - mouseY;
         newPitch = Mathf.Clamp(newPitch, -80f, 60f);
+        
+
+        bool isAttacking = combat != null && combat.IsAttacking();
+        bool isCharging = combat != null && combat.IsCharging();
 
         Quaternion testRotation = Quaternion.Euler(newPitch, yaw, 0);
         Vector3 testOffset = testRotation * new Vector3(0, height, -distance);
@@ -62,11 +113,57 @@ public class ThirdPersonCamera : MonoBehaviour
             pitch = newPitch;
         }
 
+        targetDistance = normalDistance;
+        if (isAttacking || isCharging)
+        {
+            targetDistance = combatDistance;
+        }
+        else if (movement != null)
+        {
+            float speed = movement.GetComponent<CharacterController>().velocity.magnitude;
+
+            if (speed > 4f)
+            {
+                targetDistance = sprintDistance;
+            }
+        }
+
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
 
+        distance = Mathf.Lerp(distance, targetDistance, Time.deltaTime * distanceSmooth);
+        height = Mathf.Lerp(height, combat != null && (isAttacking || isCharging) ? combatHeight : normalHeight, Time.deltaTime * heightSmooth);
+
+
+        height = Mathf.Lerp(height, isAttacking || isCharging ? combatHeight : normalHeight, Time.deltaTime * heightSmooth);
+        distance = Mathf.Lerp(distance, targetDistance, Time.deltaTime * distanceSmooth);
         Vector3 offset = rotation * new Vector3(0, height, -distance);
 
-        Vector3 desiredPosition = target.position + offset + dodgeImpulse;
+        motionTime += Time.deltaTime;
+
+        float swayX = Mathf.Sin(motionTime * swaySpeed) * swayAmount;
+        float swayY = Mathf.Cos(motionTime * breatheSpeed) * breatheAmount;
+
+        Vector3 subtleOffset = new Vector3(swayX, swayY, 0f);
+        
+        Vector3 desiredPosition = target.position + offset + subtleOffset + dodgeImpulse;
+
+        Vector3 directionToCamera = offset.normalized;
+        float cameraDistance = offset.magnitude;
+
+        RaycastHit hit;
+
+        if (Physics.SphereCast(
+            target.position,
+            obstacleRadius,
+            directionToCamera,
+            out hit,
+            cameraDistance,
+            obstacleLayers))
+        {
+            desiredPosition = target.position + (directionToCamera * (hit.distance - obstacleBuffer)) + dodgeImpulse;
+        }
+
+        
 
         // overshoot based on movement direction
         Vector3 frameVelocity = (transform.position - lastPosition) / Time.deltaTime;
@@ -85,6 +182,29 @@ public class ThirdPersonCamera : MonoBehaviour
             Vector3.zero,
             Time.deltaTime * impulseReturnSpeed
         );
+
+
+        float targetFOV = normalFOV;
+        if (isCharging)
+        {
+            targetFOV = chargeZoomFOV;
+        }
+
+        if (doChargeKick)
+        {
+            targetFOV = chargedAttackKickFOV;
+        }
+
+        Camera cam = GetComponent<Camera>();
+
+        if (cam != null)
+        {
+            cam.fieldOfView = Mathf.Lerp(
+                cam.fieldOfView,
+                targetFOV,
+                Time.deltaTime * zoomSmoothSpeed
+            );
+        }
 
         transform.LookAt(target.position + Vector3.up * height);
     }
@@ -110,5 +230,24 @@ public class ThirdPersonCamera : MonoBehaviour
         }
 
         dodgeImpulse += dir * strength;
+    }
+
+    public void SetChargeZoom(bool state)
+    {
+        isCharging = state;
+    }
+
+    public void TriggerChargeKick()
+    {
+        doChargeKick = true;
+        StopCoroutine("ResetKick");
+        StartCoroutine(ResetKick());
+    }
+
+    private IEnumerator ResetKick()
+    {
+        yield return new WaitForSeconds(0.15f);
+
+        doChargeKick = false;
     }
 }

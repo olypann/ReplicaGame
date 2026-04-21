@@ -29,6 +29,8 @@ public class WeaponScript : MonoBehaviour
             enemy.TakeDamage(playerCombat.GetCurrentDamage());
 
             playerCombat.AddAbilityCharge(playerCombat.abilityGainPerHit);
+
+            SoundManager.Instance?.PlayAttack1Hit();
         }
     }
 

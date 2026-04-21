@@ -286,7 +286,18 @@ public class PlayerCombat : MonoBehaviour
             if (chargeReadyObject != null)
             {
                 chargeReadyObject.SetActive(true);
+
+                //SoundManager.Instance?.PlayChargeReady();
+                SoundManager.Instance?.PlayChargeLoop(true);
             }
+
+            if (animator != null)
+            {
+                animator.SetBool("isCharging", true);
+            }
+
+            Camera.main.GetComponent<ThirdPersonCamera>()?.SetChargeZoom(true);
+            
         }
 
         // full charge effect
@@ -310,6 +321,17 @@ public class PlayerCombat : MonoBehaviour
         {
             chargeFullObject.SetActive(false);
         }
+
+        SoundManager.Instance?.PlayChargeLoop(false);
+        SoundManager.Instance?.PlayChargeReady();
+
+        if (animator != null)
+        {
+            animator.SetBool("isCharging", false);
+        }
+
+        Camera.main.GetComponent<ThirdPersonCamera>()?.SetChargeZoom(false);
+
     }
 
     private void TryAttack()
@@ -400,6 +422,8 @@ public class PlayerCombat : MonoBehaviour
             attackDuration = 0.35f;
 
             StartCoroutine(PlayVFXDelayed(attack1VFX, attack1VFXTime));
+
+            SoundManager.Instance?.PlayAttack1Swing();
         }
         else if (step == 2)
         {
@@ -408,6 +432,8 @@ public class PlayerCombat : MonoBehaviour
             attackDuration = 0.45f;
 
             StartCoroutine(PlayVFXDelayed(attack2VFX, attack2VFXTime));
+
+            SoundManager.Instance?.PlayAttack2Swing();
         }
         else if (step == 3)
         {
@@ -417,6 +443,8 @@ public class PlayerCombat : MonoBehaviour
             isInvulnerable = true;
 
             StartCoroutine(PlayVFXDelayed(attack3VFX, attack3VFXTime));
+
+            SoundManager.Instance?.PlayAttack3Swing();
         }
 
         yield return new WaitForSeconds(attackDuration * 0.5f);
@@ -444,10 +472,14 @@ public class PlayerCombat : MonoBehaviour
         animator.SetTrigger(animCharge);
         currentAttackDamage = chargedDamage;
 
+        SoundManager.Instance?.PlayChargedSwing();
+
         if (weaponHitbox != null)
         {
             weaponHitbox.ResetHits();
         }
+
+        Camera.main.GetComponent<ThirdPersonCamera>()?.TriggerChargeKick();
 
         StartCoroutine(PlayVFXDelayed(chargedAttackVFX, chargedAttackVFXTime));
         StartCoroutine(StopChargeLoopDelayed());
@@ -456,6 +488,7 @@ public class PlayerCombat : MonoBehaviour
 
         isAttacking = false;
         isInvulnerable = false;
+        
     }
 
     private IEnumerator StopChargeLoopDelayed()
@@ -480,6 +513,8 @@ public class PlayerCombat : MonoBehaviour
             controller.Move(Vector3.down * airAttackForce * Time.deltaTime);
             yield return null;
         }
+
+        SoundManager.Instance?.PlayAirLand();
 
         StartCoroutine(PlayVFXDelayed(airAttackVFX, airAttackVFXTime));
 
@@ -507,6 +542,8 @@ public class PlayerCombat : MonoBehaviour
     private void UseAbility()
     {
         currentAbilityCharge = 0f;
+
+        SoundManager.Instance?.PlayAbilityUse();
     }
 
     public void AddAbilityCharge(float amount)
@@ -547,5 +584,10 @@ public class PlayerCombat : MonoBehaviour
     public void ResetAirAttackFlag()
     {
         didAirAttack = false;
+    }
+
+    public bool IsCharging()
+    {
+        return isCharging;
     }
 }

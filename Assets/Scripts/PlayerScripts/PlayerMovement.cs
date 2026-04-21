@@ -166,6 +166,20 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
+        if (combat != null)
+        {
+            if (combat.IsAttacking() || combat.IsCharging())
+            {
+                // fully stop horizontal movement
+                speed = 0f;
+
+                // still apply gravity
+                controller.Move(Vector3.up * verticalSpeed * Time.deltaTime);
+
+                return;
+            }
+        }
+
         Vector2 moveInput = GetMoveInput();
 
         // lock movement during attack
@@ -230,6 +244,14 @@ public class PlayerMovement : MonoBehaviour
             }
 
             animator.SetFloat(animSpeed, normalizedSpeed);
+        }
+
+        if (SoundManager.Instance != null)
+        {
+            float normalizedSpeed = speed / sprintSpeed;
+            bool isMoving = normalizedSpeed > 0.1f && Grounded;
+
+            SoundManager.Instance.HandleFootsteps(normalizedSpeed, isMoving);
         }
     }
 
@@ -330,6 +352,8 @@ public class PlayerMovement : MonoBehaviour
         {
             cam.AddDodgeImpulse(dodgeDirection);
         }
+
+        SoundManager.Instance?.PlayDodge();
     }
 
     private void PlayDodgeVFX(Vector3 dir)
@@ -476,6 +500,8 @@ public class PlayerMovement : MonoBehaviour
                 {
                     animator.SetTrigger(animLand);
                 }
+
+                SoundManager.Instance?.PlayLand();
             }
         }
 
