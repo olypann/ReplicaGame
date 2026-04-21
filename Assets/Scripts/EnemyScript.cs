@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class EnemyScript : MonoBehaviour
 {
+    public bool cameraOnlyEnemy;
     [Header("Target")]
     [SerializeField] private Transform player;
 
@@ -91,7 +92,12 @@ public class EnemyScript : MonoBehaviour
 
         cooldownTimer -= Time.deltaTime;
 
-        if (player != null)
+        // camera-only enemy just patrols and ignores player logic
+        if (cameraOnlyEnemy)
+        {
+            Patrol();
+        }
+        else if (player != null)
         {
             float distance = Vector3.Distance(transform.position, player.position);
 

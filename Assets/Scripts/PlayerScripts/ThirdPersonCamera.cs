@@ -73,6 +73,21 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private Vector3 lastPosition;
 
+    // external effects
+    private Vector3 externalImpulse;
+    private float externalImpulseReturnSpeed = 6f;
+
+    private float externalRoll;
+    private float externalYaw;
+    private float externalPitch;
+
+    private float rollReturnSpeed = 3f;
+
+    private float screenShakeTime;
+    private float screenShakeStrength;
+    private float screenShakeReturnSpeed;
+    private Vector2 screenShakeOffset;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -92,9 +107,9 @@ public class ThirdPersonCamera : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        yaw += mouseX;
+        yaw += mouseX + externalYaw;
 
-        float newPitch = pitch - mouseY;
+        float newPitch = pitch - mouseY + externalPitch;
         newPitch = Mathf.Clamp(newPitch, -80f, 60f);
         
 
@@ -128,7 +143,7 @@ public class ThirdPersonCamera : MonoBehaviour
             }
         }
 
-        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0);
+        Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
 
         distance = Mathf.Lerp(distance, targetDistance, Time.deltaTime * distanceSmooth);
         height = Mathf.Lerp(height, combat != null && (isAttacking || isCharging) ? combatHeight : normalHeight, Time.deltaTime * heightSmooth);
@@ -145,7 +160,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
         Vector3 subtleOffset = new Vector3(swayX, swayY, 0f);
         
-        Vector3 desiredPosition = target.position + offset + subtleOffset + dodgeImpulse;
+        Vector3 desiredPosition = target.position + offset + subtleOffset + dodgeImpulse + externalImpulse;
 
         Vector3 directionToCamera = offset.normalized;
         float cameraDistance = offset.magnitude;
@@ -160,10 +175,8 @@ public class ThirdPersonCamera : MonoBehaviour
             cameraDistance,
             obstacleLayers))
         {
-            desiredPosition = target.position + (directionToCamera * (hit.distance - obstacleBuffer)) + dodgeImpulse;
+            desiredPosition = target.position + (directionToCamera * (hit.distance - obstacleBuffer)) + dodgeImpulse + externalImpulse;
         }
-
-        
 
         // overshoot based on movement direction
         Vector3 frameVelocity = (transform.position - lastPosition) / Time.deltaTime;
@@ -183,6 +196,29 @@ public class ThirdPersonCamera : MonoBehaviour
             Time.deltaTime * impulseReturnSpeed
         );
 
+        externalImpulse = Vector3.Lerp(
+            externalImpulse,
+            Vector3.zero,
+            Time.deltaTime * externalImpulseReturnSpeed
+        );
+
+        externalRoll = Mathf.Lerp(
+            externalRoll,
+            0f,
+            Time.deltaTime * rollReturnSpeed
+        );
+
+        externalYaw = Mathf.Lerp(
+            externalYaw,
+            0f,
+            Time.deltaTime * rollReturnSpeed
+        );
+
+        externalPitch = Mathf.Lerp(
+            externalPitch,
+            0f,
+            Time.deltaTime * rollReturnSpeed
+        );
 
         float targetFOV = normalFOV;
         if (isCharging)
@@ -206,7 +242,33 @@ public class ThirdPersonCamera : MonoBehaviour
             );
         }
 
+        // transform.LookAt(target.position + Vector3.up * height);
+        // transform.rotation = transform.rotation * Quaternion.Euler(0f, 0f, externalRoll);
+        float shakeX = 0f;
+        float shakeY = 0f;
+
+        if (screenShakeTime > 0f)
+        {
+            screenShakeTime -= Time.deltaTime;
+
+            screenShakeOffset = Random.insideUnitCircle * screenShakeStrength;
+
+            shakeX = screenShakeOffset.x;
+            shakeY = screenShakeOffset.y;
+        }
+        else
+        {
+            screenShakeOffset = Vector2.Lerp(
+                screenShakeOffset,
+                Vector2.zero,
+                Time.deltaTime * screenShakeReturnSpeed
+            );
+        }
+
         transform.LookAt(target.position + Vector3.up * height);
+
+        transform.rotation = transform.rotation * Quaternion.Euler(shakeY, shakeX, externalRoll);
+            
     }
 
     public void AddDodgeImpulse(Vector3 dodgeDirection)
@@ -232,6 +294,39 @@ public class ThirdPersonCamera : MonoBehaviour
         dodgeImpulse += dir * strength;
     }
 
+    public void AddExternalImpulse(Vector3 dir, float strength, float returnSpeed, Vector3 axisMask)
+    {
+        Vector3 push = -dir.normalized;
+
+        push = Vector3.Scale(push, axisMask);
+
+        externalImpulse += push * strength;
+
+        externalImpulseReturnSpeed = returnSpeed;
+    }
+
+    public void AddExternalRotation(Vector3 dir, float strength, float returnSpeed, CameraEntity.CameraRotationAxis axis)
+    {
+        float side = Vector3.Dot(dir, transform.right);
+
+        if (axis == CameraEntity.CameraRotationAxis.Roll)
+        {
+            externalRoll += side * strength;
+        }
+
+        if (axis == CameraEntity.CameraRotationAxis.Yaw)
+        {
+            externalYaw += side * strength;
+        }
+
+        if (axis == CameraEntity.CameraRotationAxis.Pitch)
+        {
+            externalPitch += side * strength;
+        }
+
+        rollReturnSpeed = returnSpeed;
+    }
+
     public void SetChargeZoom(bool state)
     {
         isCharging = state;
@@ -249,5 +344,12 @@ public class ThirdPersonCamera : MonoBehaviour
         yield return new WaitForSeconds(0.15f);
 
         doChargeKick = false;
+    }
+
+    public void AddScreenShake(float strength, float returnSpeed, float duration)
+    {
+        screenShakeStrength = strength;
+        screenShakeReturnSpeed = returnSpeed;
+        screenShakeTime = duration;
     }
 }
