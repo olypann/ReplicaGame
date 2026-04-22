@@ -42,11 +42,11 @@ public class CrosshairUIAnimator : MonoBehaviour
 
         float progress = timer / animationDuration;
 
-        // Rotation
+        // rotation
         float rotation = rotationSpeed * Time.deltaTime;
-        root.Rotate(0f, 0f, rotation);
+        root.Rotate(0f, 0f, rotation, Space.Self);
 
-        // Scale (shrink then grow)
+        // scale up down
         float scaleCurve = Mathf.Sin(progress * Mathf.PI);
 
         float scale = Mathf.Lerp(1f, 0.5f, scaleCurve);
@@ -57,7 +57,8 @@ public class CrosshairUIAnimator : MonoBehaviour
         {
             isAnimating = false;
             root.localScale = originalScale;
-            root.rotation = Quaternion.identity;
+            
+            root.localRotation = Quaternion.identity;
         }
     }
 }

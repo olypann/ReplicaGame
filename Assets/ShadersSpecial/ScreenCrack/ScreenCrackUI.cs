@@ -8,6 +8,7 @@ public class ScreenCrackUI : MonoBehaviour
     [Header("fade settings")]
     public float restoreRate = 1f;
 
+
     void Update()
     {
         if (camEntity == null || mat == null)
@@ -21,6 +22,7 @@ public class ScreenCrackUI : MonoBehaviour
         {
             camEntity.screenDamage = 0f;
         }
+
 
         mat.SetFloat("_Damage", camEntity.screenDamage);
     }

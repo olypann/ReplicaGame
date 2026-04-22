@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections;
+
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -83,6 +85,18 @@ public class PlayerMovement : MonoBehaviour
     private int animDodgeForward;
     private int animDodgeBack;
 
+    public bool isPossessed;
+
+    [Header("Ability 3 - Time Freeze")]
+    [SerializeField] private float timeFreezeDuration = 4f;
+    [SerializeField] private float freezeTimeScale = 0.05f;
+    [SerializeField] private float pushForce = 8f;
+    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private GameObject freezeUI;
+
+    private bool isTimeFrozenAbilityActive;
+    private float freezeTimer;
+
     private void Awake()
     {
         // find main camera reference
@@ -91,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        // setup references
+        //references
         controller = GetComponent<CharacterController>();
         combat = GetComponent<PlayerCombat>();
 
@@ -124,11 +138,31 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        {
+            return;
+        }
+        if (isPossessed)
+        {
+            return;
+        }
+        PlayerCombat combat = GetComponent<PlayerCombat>();
+
+        if (combat != null && combat.IsPossessing())
+        {
+            return;
+        }
+
         GroundCheck();
         NearGroundCheck();
         Jump();
         Movement();
         HandleDodge();
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            StartCoroutine(TimeFreezeAbility());
+        }
     }
 
     private void LateUpdate()
@@ -170,7 +204,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (combat.IsAttacking() || combat.IsCharging())
             {
-                // fully stop horizontal movement
+                // fully stoped horizontal movement
                 speed = 0f;
 
                 // still apply gravity
@@ -275,7 +309,6 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        // a key (left)
         if (Input.GetKeyDown(KeyCode.A))
         {
             if (Time.time - lastATapTime <= doubleTapTime)
@@ -286,7 +319,6 @@ public class PlayerMovement : MonoBehaviour
             lastATapTime = Time.time;
         }
 
-        // d key (right)
         if (Input.GetKeyDown(KeyCode.D))
         {
             if (Time.time - lastDTapTime <= doubleTapTime)
@@ -297,7 +329,6 @@ public class PlayerMovement : MonoBehaviour
             lastDTapTime = Time.time;
         }
 
-        // s key (backwards)
         if (Input.GetKeyDown(KeyCode.S))
         {
             if (Time.time - lastSTapTime <= doubleTapTime)
@@ -308,7 +339,6 @@ public class PlayerMovement : MonoBehaviour
             lastSTapTime = Time.time;
         }
 
-        // w key (forward)
         if (Input.GetKeyDown(KeyCode.W))
         {
             if (Time.time - lastWTapTime <= doubleTapTime)
@@ -376,7 +406,7 @@ public class PlayerMovement : MonoBehaviour
             Quaternion.LookRotation(spawnDir)
         );
 
-        // cleans itself up after a short time
+        // self cleans after some time
         Destroy(vfx, 1.0f);
     }
 
@@ -416,7 +446,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // jump
 
     private void Jump()
     {
@@ -528,6 +557,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void CameraRotation()
     {
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        {
+            return;
+        }
+
         Vector2 lookInput = GetLookInput();
 
         yaw += lookInput.x;
@@ -536,5 +570,89 @@ public class PlayerMovement : MonoBehaviour
         pitch = Mathf.Clamp(pitch, BottomClamp, TopClamp);
 
         cameraTarget.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
+    }
+
+    private IEnumerator TimeFreezeAbility()
+    {
+        Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
+
+        if (isTimeFrozenAbilityActive)
+        {
+            yield break;
+        }
+            
+
+        isTimeFrozenAbilityActive = true;
+        freezeTimer = timeFreezeDuration;
+
+        if (freezeUI != null)
+        {
+            freezeUI.SetActive(true);
+        }
+            
+
+        Time.timeScale = freezeTimeScale;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+
+        Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(true);
+
+        while (freezeTimer > 0f)
+        {
+            freezeTimer -= Time.unscaledDeltaTime;
+
+            HandleFrozenClick();
+
+            yield return null;
+        }
+
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = 0.02f;
+
+        if (freezeUI != null)
+        {
+            freezeUI.SetActive(false);
+        }
+            
+
+        Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(false);
+        Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
+
+        isTimeFrozenAbilityActive = false;
+
+        
+    }
+
+
+    private void HandleFrozenClick()
+    {
+        if (!Input.GetMouseButtonDown(0))
+        {
+            return;
+        }
+            
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, enemyLayer))
+        {
+            EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
+
+            if (enemy != null)
+            {
+                Vector3 dir = (enemy.transform.position - Camera.main.transform.position).normalized;
+
+                enemy.TakeDamage(10f);
+
+                Rigidbody rb = enemy.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.AddForce(dir * pushForce, ForceMode.Impulse);
+                }
+                else
+                {
+                    enemy.transform.position += dir * pushForce * 0.1f;
+                }
+            }
+        }
     }
 }

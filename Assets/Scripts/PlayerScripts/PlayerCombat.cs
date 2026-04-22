@@ -107,9 +107,29 @@ public class PlayerCombat : MonoBehaviour
     private WeaponScript weaponHitbox;
     private CharacterController controller;
 
+    [Header("possession ability")]
+    [SerializeField] private float possessionDuration = 15f;
+
+    private bool isPossessing;
+    private float possessionTimer;
+
+    public EnemyPossessionController currentPossessed;
+    private PlayerPossessedAI possessedAI;
+    public bool isPossessed;
+
+    private ThirdPersonCamera cam;
+
+    private bool isTargetingAbilityActive;
+    [Header("Ability 1 - Possession Mode")]
+    private bool ability1Active;
+    private float ability1Timer;
+    [SerializeField] private float ability1Duration = 15f;
+
     private void Start()
     {
-        // setup references and starting values
+        cam = Camera.main.GetComponent<ThirdPersonCamera>();
+        //setup references and starting values
+        possessedAI = GetComponent<PlayerPossessedAI>();
         currentStamina = maxStamina;
         currentAbilityCharge = 0f;
 
@@ -153,12 +173,24 @@ public class PlayerCombat : MonoBehaviour
 
     private void Update()
     {
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        {
+            return;
+        }
+        if (isPossessed)
+        {
+            HandlePossessedAI();
+            return;
+        }
         // main update loop
         HandleStamina();
         
         HandleComboTimer();
         HandleAttackInput();
         HandleCharge();
+
+        HandlePossessionAbility();
+        HandleAbility1();
 
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -231,7 +263,7 @@ public class PlayerCombat : MonoBehaviour
             chargeStarted = false;
             isCharging = true;
 
-            // queue combo if currently attacking
+            //queue combo if currently attacking
             if (isAttacking)
             {
                 if (canCombo)
@@ -352,7 +384,7 @@ public class PlayerCombat : MonoBehaviour
             comboStep = 1;
         }
 
-        // set combo timers
+        //  combo timers
         if (comboStep == 1)
         {
             comboTimer = combo1ResetTime;
@@ -394,7 +426,7 @@ public class PlayerCombat : MonoBehaviour
 
     private IEnumerator DoAttack(int step)
     {
-        // start attack state
+        // starting attack state
         isAttacking = true;
         attackQueued = false;
         canCombo = false;
@@ -414,7 +446,7 @@ public class PlayerCombat : MonoBehaviour
         animator.ResetTrigger(animAttack2);
         animator.ResetTrigger(animAttack3);
 
-        // choose attack type
+        // attack type
         if (step == 1)
         {
             animator.SetTrigger(animAttack1);
@@ -455,7 +487,7 @@ public class PlayerCombat : MonoBehaviour
         isAttacking = false;
         isInvulnerable = false;
 
-        // handle queued combo
+        //queued combo
         if (attackQueued)
         {
             attackQueued = false;
@@ -507,7 +539,7 @@ public class PlayerCombat : MonoBehaviour
 
         animator.SetTrigger(animAirAttack);
 
-        // push player downward while airborne
+        // push player downward while in air
         while (!controller.isGrounded)
         {
             controller.Move(Vector3.down * airAttackForce * Time.deltaTime);
@@ -589,5 +621,232 @@ public class PlayerCombat : MonoBehaviour
     public bool IsCharging()
     {
         return isCharging;
+    }
+
+    private void HandlePossessionAbility()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (ability1Active || isPossessing)
+                return;
+
+            if (currentAbilityCharge < maxAbilityCharge)
+                return;
+
+            currentAbilityCharge = 0f;
+
+            StartAbility1(); 
+        }
+
+        if (!isPossessing)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            SwitchPossessionTarget();
+        }
+
+        possessionTimer -= Time.deltaTime;
+
+        if (possessionTimer <= 0f)
+        {
+            EndPossession();
+        }
+    }
+    private void StartPossession()
+    {
+        isPossessing = true;
+        possessionTimer = possessionDuration;
+
+        SwitchPossessionTarget();
+    }
+
+    private void EndPossession()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        isPossessing = false;
+
+        if (currentPossessed != null)
+        {
+            currentPossessed.SetPossessed(false, null);
+            currentPossessed = null;
+        }
+
+        if (cam != null)
+        {
+            cam.SetTarget(transform);
+        }
+    }
+
+    private void SwitchPossessionTarget()
+    {
+        EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();
+
+        float closestDist = Mathf.Infinity;
+        EnemyScript closest = null;
+
+        foreach (EnemyScript e in enemies)
+        {
+            if (e == null || e.gameObject == gameObject)
+            {
+                continue;
+            }
+                
+
+            EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
+
+            if (ep != null && ep.IsPossessed())
+            {
+                continue;
+            }
+                
+
+            float dist = Vector3.Distance(transform.position, e.transform.position);
+
+            if (dist < closestDist)
+            {
+                closestDist = dist;
+                closest = e;
+            }
+        }
+
+        if (closest == null)
+        {
+            return;
+        }
+            
+
+        // unpossess old
+        if (currentPossessed != null)
+        {
+            currentPossessed.SetPossessed(false, null);
+        }
+
+        EnemyPossessionController controller = closest.GetComponent<EnemyPossessionController>();
+
+        if (controller == null)
+        {
+            controller = closest.gameObject.AddComponent<EnemyPossessionController>();
+        }
+            
+
+        controller.SetPossessed(true, Camera.main.transform);
+
+        currentPossessed = controller;
+
+        if (cam != null)
+        {
+            cam.SetTarget(closest.transform);
+        }
+    }
+
+    public bool IsPossessing()
+    {
+        return isPossessing;
+    }
+
+    private void HandlePossessedAI()
+    {
+        if (GetComponent<PlayerPossessedAI>() == null)
+        {
+            return;
+        }
+
+    }
+
+    public void ForceAttack()
+    {
+        if (isAttacking)
+        {
+            return;
+        }
+
+        TryAttack();
+    }
+
+
+    private void HandleAbility1()
+    {
+        if (!ability1Active)
+        {
+            return;
+        }
+            
+
+        ability1Timer -= Time.deltaTime;
+
+        if (ability1Timer <= 0f)
+        {
+            EndAbility1();
+            return;
+        }
+
+        HandleAbility1Click();
+    }
+
+    private void StartAbility1()
+    {
+        isPossessing = true;
+        ability1Active = true;
+        possessionTimer = possessionDuration;
+
+        SwitchPossessionTarget();
+    }
+
+    private void EndAbility1()
+    {
+        ability1Active = false;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        Debug.Log("Ability 1 ended");
+    }
+
+
+    private void HandleAbility1Click()
+    {
+        if (!Input.GetMouseButtonDown(0))
+        {
+            return;
+        }
+            
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+        {
+            EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
+
+            if (enemy == null)
+            {
+                return;
+            }
+                
+
+            enemy.TakeDamage(20f);
+
+            Vector3 dir = (enemy.transform.position - Camera.main.transform.position);
+            dir.y = 0f;
+
+            enemy.ApplyKnockback(dir, 6f);
+            
+        }
+    }
+
+    private IEnumerator PushEnemy(CharacterController cc, Vector3 dir)
+    {
+        float time = 0.15f;
+        float t = 0f;
+
+        while (t < time)
+        {
+            t += Time.deltaTime;
+            cc.Move(dir * 10f * Time.deltaTime);
+            yield return null;
+        }
     }
 }

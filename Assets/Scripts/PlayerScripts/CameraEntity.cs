@@ -18,7 +18,7 @@ public class CameraEntity : MonoBehaviour
     [Header("push settings")]
     [SerializeField] private float pushStrength = 1.2f;
     [SerializeField] private float pushReturnSpeed = 2f;
-    [SerializeField] private Vector3 pushAxisMask = new Vector3(1f, 0f, 1f); // y = 0 prevents vertical push
+    [SerializeField] private Vector3 pushAxisMask = new Vector3(1f, 0f, 1f); //y 0 to stop verticl push
 
     [Header("rotation settings")]
     [SerializeField] private float rotateStrength = 10f;

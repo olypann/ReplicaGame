@@ -60,7 +60,7 @@ public class PlayerStats : MonoBehaviour
         DamagePopupManager.Instance.SpawnDamagePopup(
             damage,
             transform,
-            true, // player hit
+            true, 
             currentHealth <= 0f,
             false,
             false

@@ -18,9 +18,9 @@ TagManager:
   - Enemy
   - Dmg_Text
   - RTeffects
-  - 
-  - 
-  - 
+  - CameraBody
+  - Camera
+  - Wall
   - 
   - 
   - 

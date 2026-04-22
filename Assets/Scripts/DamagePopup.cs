@@ -23,7 +23,7 @@ public class DamagePopup : MonoBehaviour
         // get components
         damageText = GetComponent<TextMeshPro>();
 
-        // fallback camera if not set in inspector
+        // fallback camera 
         if (cameraTransform == null && Camera.main != null)
         {
             cameraTransform = Camera.main.transform;
@@ -40,16 +40,24 @@ public class DamagePopup : MonoBehaviour
         if (textEffect != null)
         {
             if (effects)
+            {
                 textEffect.StartManualEffects();
+            }
+
             else
+            {
                 textEffect.StartManualEffect("killwave");
+            }
+                
         }
     }
 
     private void LateUpdate()
     {
         if (cameraTransform == null)
+        {
             return;
+        }
 
         // face camera
         transform.LookAt(2 * transform.position - cameraTransform.position);
@@ -71,7 +79,7 @@ public class DamagePopup : MonoBehaviour
             }
         }
 
-        // scale over lifetime (fixed logic)
+        // scale over lifetime
         float scaleSpeed = 0.8f;
 
         if (lifetime > startLifetime * 0.5f)

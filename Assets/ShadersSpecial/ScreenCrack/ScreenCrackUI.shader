@@ -8,6 +8,7 @@ Shader "UI/ScreenCrack_Overlay"
 
     SubShader
     {
+        
         Tags
         {
             "Queue"="Transparent"
@@ -26,6 +27,7 @@ Shader "UI/ScreenCrack_Overlay"
 
             #include "UnityCG.cginc"
 
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -39,6 +41,8 @@ Shader "UI/ScreenCrack_Overlay"
                 float2 uv : TEXCOORD0;
                 fixed4 color : COLOR;
             };
+
+
 
             sampler2D _CrackTex;
             float _Damage;

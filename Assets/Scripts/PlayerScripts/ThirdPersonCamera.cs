@@ -73,7 +73,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private Vector3 lastPosition;
 
-    // external effects
+    // other effects
     private Vector3 externalImpulse;
     private float externalImpulseReturnSpeed = 6f;
 
@@ -88,6 +88,17 @@ public class ThirdPersonCamera : MonoBehaviour
     private float screenShakeReturnSpeed;
     private Vector2 screenShakeOffset;
 
+    [Header("target blending")]
+    [SerializeField] private float targetBlendSpeed = 6f;
+
+    private Transform currentTarget;
+    private Transform targetGoal;
+    private float targetBlendT;
+
+    private bool frozen;
+    private Vector3 frozenPosition;
+    private Quaternion frozenRotation;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -95,14 +106,32 @@ public class ThirdPersonCamera : MonoBehaviour
 
         combat = target.GetComponent<PlayerCombat>();
         movement = target.GetComponent<PlayerMovement>();
+
+        currentTarget = target;
+        targetGoal = target;
     }
 
     private void LateUpdate()
     {
-        if (target == null)
+        if (frozen)
+        {
+            transform.position = frozenPosition;
+            transform.rotation = frozenRotation;
+            return;
+        }
+
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        {
+            transform.LookAt(target.position + Vector3.up * height);
+            return;
+        }
+
+        if (currentTarget == null)
         {
             return;
         }
+
+        Vector3 blendedTargetPos = GetBlendedTargetPosition();
 
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
@@ -111,24 +140,24 @@ public class ThirdPersonCamera : MonoBehaviour
 
         float newPitch = pitch - mouseY + externalPitch;
         newPitch = Mathf.Clamp(newPitch, -80f, 60f);
-        
 
         bool isAttacking = combat != null && combat.IsAttacking();
         bool isCharging = combat != null && combat.IsCharging();
 
         Quaternion testRotation = Quaternion.Euler(newPitch, yaw, 0);
         Vector3 testOffset = testRotation * new Vector3(0, height, -distance);
-        Vector3 testPosition = target.position + testOffset;
+        Vector3 testPosition = blendedTargetPos + testOffset;
 
-        Vector3 direction = testPosition - target.position;
+        Vector3 direction = testPosition - blendedTargetPos;
         float distanceToTarget = direction.magnitude;
 
-        if (!Physics.Raycast(target.position, direction.normalized, distanceToTarget, groundLayer))
+        if (!Physics.Raycast(blendedTargetPos, direction.normalized, distanceToTarget, groundLayer))
         {
             pitch = newPitch;
         }
 
         targetDistance = normalDistance;
+
         if (isAttacking || isCharging)
         {
             targetDistance = combatDistance;
@@ -146,11 +175,13 @@ public class ThirdPersonCamera : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
 
         distance = Mathf.Lerp(distance, targetDistance, Time.deltaTime * distanceSmooth);
-        height = Mathf.Lerp(height, combat != null && (isAttacking || isCharging) ? combatHeight : normalHeight, Time.deltaTime * heightSmooth);
 
+        height = Mathf.Lerp(
+            height,
+            combat != null && (isAttacking || isCharging) ? combatHeight : normalHeight,
+            Time.deltaTime * heightSmooth
+        );
 
-        height = Mathf.Lerp(height, isAttacking || isCharging ? combatHeight : normalHeight, Time.deltaTime * heightSmooth);
-        distance = Mathf.Lerp(distance, targetDistance, Time.deltaTime * distanceSmooth);
         Vector3 offset = rotation * new Vector3(0, height, -distance);
 
         motionTime += Time.deltaTime;
@@ -159,8 +190,8 @@ public class ThirdPersonCamera : MonoBehaviour
         float swayY = Mathf.Cos(motionTime * breatheSpeed) * breatheAmount;
 
         Vector3 subtleOffset = new Vector3(swayX, swayY, 0f);
-        
-        Vector3 desiredPosition = target.position + offset + subtleOffset + dodgeImpulse + externalImpulse;
+
+        Vector3 desiredPosition = blendedTargetPos + offset + subtleOffset + dodgeImpulse + externalImpulse;
 
         Vector3 directionToCamera = offset.normalized;
         float cameraDistance = offset.magnitude;
@@ -168,14 +199,14 @@ public class ThirdPersonCamera : MonoBehaviour
         RaycastHit hit;
 
         if (Physics.SphereCast(
-            target.position,
+            blendedTargetPos,
             obstacleRadius,
             directionToCamera,
             out hit,
             cameraDistance,
             obstacleLayers))
         {
-            desiredPosition = target.position + (directionToCamera * (hit.distance - obstacleBuffer)) + dodgeImpulse + externalImpulse;
+            desiredPosition = blendedTargetPos + (directionToCamera * (hit.distance - obstacleBuffer)) + dodgeImpulse + externalImpulse;
         }
 
         // overshoot based on movement direction
@@ -221,6 +252,7 @@ public class ThirdPersonCamera : MonoBehaviour
         );
 
         float targetFOV = normalFOV;
+
         if (isCharging)
         {
             targetFOV = chargeZoomFOV;
@@ -242,8 +274,6 @@ public class ThirdPersonCamera : MonoBehaviour
             );
         }
 
-        // transform.LookAt(target.position + Vector3.up * height);
-        // transform.rotation = transform.rotation * Quaternion.Euler(0f, 0f, externalRoll);
         float shakeX = 0f;
         float shakeY = 0f;
 
@@ -265,10 +295,47 @@ public class ThirdPersonCamera : MonoBehaviour
             );
         }
 
-        transform.LookAt(target.position + Vector3.up * height);
+        transform.LookAt(blendedTargetPos + Vector3.up * height);
 
         transform.rotation = transform.rotation * Quaternion.Euler(shakeY, shakeX, externalRoll);
-            
+    }
+
+    private Vector3 GetBlendedTargetPosition()
+    {
+        if (currentTarget == targetGoal)
+        {
+            return currentTarget.position;
+        }
+
+        targetBlendT += Time.deltaTime * targetBlendSpeed;
+
+        Vector3 pos = Vector3.Lerp(
+            currentTarget.position,
+            targetGoal.position,
+            targetBlendT
+        );
+
+        if (targetBlendT >= 1f)
+        {
+            currentTarget = targetGoal;
+            targetBlendT = 0f;
+        }
+
+        return pos;
+    }
+
+    public void SetTarget(Transform newTarget)
+    {
+        if (newTarget == null)
+        {
+            return;
+        }
+
+        currentTarget = target;
+        targetGoal = newTarget;
+        target = newTarget;
+
+        targetBlendT = 0f;
     }
 
     public void AddDodgeImpulse(Vector3 dodgeDirection)
@@ -279,7 +346,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
         float strength = sideImpulse;
 
-        // forward / back detection
+        // forward back 
         float forwardDot = Vector3.Dot(dodgeDirection, target.forward);
 
         if (forwardDot > 0.5f)
@@ -352,4 +419,24 @@ public class ThirdPersonCamera : MonoBehaviour
         screenShakeReturnSpeed = returnSpeed;
         screenShakeTime = duration;
     }
+
+    public void ResetShake()
+    {
+        screenShakeTime = 0f;
+        screenShakeStrength = 0f;
+        screenShakeOffset = Vector2.zero;
+    }
+
+    public void SetFrozen(bool state)
+    {
+        frozen = state;
+
+        if (state)
+        {
+            frozenPosition = transform.position;
+            frozenRotation = transform.rotation;
+        }
+    }
+
+    
 }
