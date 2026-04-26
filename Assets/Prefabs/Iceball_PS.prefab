@@ -14546,7 +14546,6 @@ GameObject:
   - component: {fileID: 719405030695863455}
   - component: {fileID: 3071196933871579357}
   - component: {fileID: 3547491045133133707}
-  - component: {fileID: 4030083782925835297}
   m_Layer: 0
   m_Name: Iceball_PS
   m_TagString: Untagged
@@ -14562,7 +14561,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3376449537875704836}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -12.53, y: 0, z: 7.05}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -19391,20 +19390,6 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &4030083782925835297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3376449537875704836}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70a766ac62e011347acb7c01445b5d2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 2.6
-  height: 3.4
 --- !u!1 &4632761620320793048
 GameObject:
   m_ObjectHideFlags: 0

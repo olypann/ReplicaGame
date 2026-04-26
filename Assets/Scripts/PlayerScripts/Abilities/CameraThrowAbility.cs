@@ -261,6 +261,7 @@ public class CameraThrowAbility : MonoBehaviour
 
     private void DamageArea(Vector3 point)
     {
+        cam.PlayCameraHitVFX();
         Collider[] hits = Physics.OverlapSphere(point, hitRadius, enemyLayer);
 
         foreach (Collider hit in hits)

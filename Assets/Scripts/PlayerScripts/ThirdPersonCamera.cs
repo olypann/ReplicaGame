@@ -120,6 +120,12 @@ public class ThirdPersonCamera : MonoBehaviour
     [SerializeField] private float throwImpulseReturnSpeed = 14f;
     private Vector3 throwCameraImpulse;
 
+    [Header("Camera Hit VFX")]
+    [SerializeField] private GameObject cameraHitVFX;
+    [SerializeField] private Transform cameraHitVFXAnchor;
+    [SerializeField] private float cameraHitVFXDistance = 1.5f;
+    private Transform runtimeHitAnchor;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -130,6 +136,13 @@ public class ThirdPersonCamera : MonoBehaviour
 
         currentTarget = target;
         targetGoal = target;
+
+        if (cameraHitVFXAnchor == null)
+        {
+            GameObject go = new GameObject("CameraHitVFXAnchor");
+            go.transform.SetParent(transform);
+            cameraHitVFXAnchor = go.transform;
+        }
     }
 
     private void LateUpdate()
@@ -358,6 +371,8 @@ public class ThirdPersonCamera : MonoBehaviour
                 Time.deltaTime * screenShakeReturnSpeed
             );
         }
+
+        UpdateHitVFXAnchor();
 
         transform.LookAt(blendedTargetPos + Vector3.up * height);
 
@@ -604,6 +619,27 @@ public class ThirdPersonCamera : MonoBehaviour
         Vector3 offset = transform.position - blendedTargetPos;
 
         transform.position = blendedTargetPos + offset;
+    }
+
+    private void UpdateHitVFXAnchor()
+    {
+        if (cameraHitVFXAnchor == null)
+            return;
+
+        cameraHitVFXAnchor.position = transform.position + transform.forward * cameraHitVFXDistance;
+        cameraHitVFXAnchor.rotation = transform.rotation;
+    }
+
+    public void PlayCameraHitVFX()
+    {
+        if (cameraHitVFX == null || cameraHitVFXAnchor == null)
+            return;
+
+        Instantiate(
+            cameraHitVFX,
+            cameraHitVFXAnchor.position,
+            cameraHitVFXAnchor.rotation
+        );
     }
 
     
