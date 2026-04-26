@@ -98,6 +98,7 @@ public class ThirdPersonCamera : MonoBehaviour
     private bool frozen;
     private Vector3 frozenPosition;
     private Quaternion frozenRotation;
+    private Vector3 shakeOffset;
 
     private void Start()
     {
@@ -113,6 +114,19 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void LateUpdate()
     {
+        
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isCameraThrowActive)
+        {
+            return;
+        }
+
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            return;
+        }
+
         if (frozen)
         {
             transform.position = frozenPosition;
@@ -198,6 +212,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
         RaycastHit hit;
 
+        float shakeX = 0f;
+        float shakeY = 0f;
+
         if (Physics.SphereCast(
             blendedTargetPos,
             obstacleRadius,
@@ -213,11 +230,16 @@ public class ThirdPersonCamera : MonoBehaviour
         Vector3 frameVelocity = (transform.position - lastPosition) / Time.deltaTime;
         Vector3 overshoot = frameVelocity * overshootStrength;
 
-        transform.position = Vector3.Lerp(
+        Vector3 finalPos = Vector3.Lerp(
             transform.position,
             desiredPosition + overshoot,
             Time.deltaTime * smoothSpeed
         );
+
+        // APPLY SHAKE HERE (THIS IS THE IMPORTANT SPOT)
+        finalPos += new Vector3(shakeX, shakeY, 0f);
+
+        transform.position = finalPos;
 
         lastPosition = transform.position;
 
@@ -274,8 +296,7 @@ public class ThirdPersonCamera : MonoBehaviour
             );
         }
 
-        float shakeX = 0f;
-        float shakeY = 0f;
+        
 
         if (screenShakeTime > 0f)
         {
@@ -436,6 +457,16 @@ public class ThirdPersonCamera : MonoBehaviour
             frozenPosition = transform.position;
             frozenRotation = transform.rotation;
         }
+    }
+
+    public void AddShake(Vector3 amount)
+    {
+        shakeOffset += amount;
+    }
+
+    public float GetYaw()
+    {
+        return yaw;
     }
 
     

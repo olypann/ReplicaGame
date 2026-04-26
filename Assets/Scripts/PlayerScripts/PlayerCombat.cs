@@ -107,29 +107,29 @@ public class PlayerCombat : MonoBehaviour
     private WeaponScript weaponHitbox;
     private CharacterController controller;
 
-    [Header("possession ability")]
-    [SerializeField] private float possessionDuration = 15f;
+    // [Header("possession ability")]
+    // [SerializeField] private float possessionDuration = 15f;
 
-    private bool isPossessing;
-    private float possessionTimer;
+    // private bool isPossessing;
+    // private float possessionTimer;
 
-    public EnemyPossessionController currentPossessed;
-    private PlayerPossessedAI possessedAI;
-    public bool isPossessed;
+    // public EnemyPossessionController currentPossessed;
+    // private PlayerPossessedAI possessedAI;
+    // public bool isPossessed;
 
     private ThirdPersonCamera cam;
 
-    private bool isTargetingAbilityActive;
-    [Header("Ability 1 - Possession Mode")]
-    private bool ability1Active;
-    private float ability1Timer;
-    [SerializeField] private float ability1Duration = 15f;
+    // private bool isTargetingAbilityActive;
+    // [Header("Ability 1 - Possession Mode")]
+    // private bool ability1Active;
+    // private float ability1Timer;
+    // [SerializeField] private float ability1Duration = 15f;
 
     private void Start()
     {
         cam = Camera.main.GetComponent<ThirdPersonCamera>();
         //setup references and starting values
-        possessedAI = GetComponent<PlayerPossessedAI>();
+        //possessedAI = GetComponent<PlayerPossessedAI>();
         currentStamina = maxStamina;
         currentAbilityCharge = 0f;
 
@@ -173,15 +173,29 @@ public class PlayerCombat : MonoBehaviour
 
     private void Update()
     {
+    
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isCameraThrowActive)
+        {
+            
+            return;
+        }
+        
+        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            return;
+        }
+
         if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
         {
             return;
         }
-        if (isPossessed)
-        {
-            HandlePossessedAI();
-            return;
-        }
+        // if (isPossessed)
+        // {
+        //     HandlePossessedAI();
+        //     return;
+        // }
         // main update loop
         HandleStamina();
         
@@ -189,13 +203,13 @@ public class PlayerCombat : MonoBehaviour
         HandleAttackInput();
         HandleCharge();
 
-        HandlePossessionAbility();
-        HandleAbility1();
+        // HandlePossessionAbility();
+        // HandleAbility1();
 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            UseAbility();
-        }
+        // if (Input.GetKeyDown(KeyCode.E))
+        // {
+        //     UseAbility();
+        // }
 
         UpdateUI();
     }
@@ -623,139 +637,149 @@ public class PlayerCombat : MonoBehaviour
         return isCharging;
     }
 
-    private void HandlePossessionAbility()
+    public bool HasFullAbilityCharge()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            if (ability1Active || isPossessing)
-                return;
-
-            if (currentAbilityCharge < maxAbilityCharge)
-                return;
-
-            currentAbilityCharge = 0f;
-
-            StartAbility1(); 
-        }
-
-        if (!isPossessing)
-        {
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            SwitchPossessionTarget();
-        }
-
-        possessionTimer -= Time.deltaTime;
-
-        if (possessionTimer <= 0f)
-        {
-            EndPossession();
-        }
-    }
-    private void StartPossession()
-    {
-        isPossessing = true;
-        possessionTimer = possessionDuration;
-
-        SwitchPossessionTarget();
+        return currentAbilityCharge >= maxAbilityCharge;
     }
 
-    private void EndPossession()
+    public void ConsumeAbilityCharge()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        isPossessing = false;
-
-        if (currentPossessed != null)
-        {
-            currentPossessed.SetPossessed(false, null);
-            currentPossessed = null;
-        }
-
-        if (cam != null)
-        {
-            cam.SetTarget(transform);
-        }
+        currentAbilityCharge = 0f;
     }
 
-    private void SwitchPossessionTarget()
-    {
-        EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();
+    // private void HandlePossessionAbility()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Alpha1))
+    //     {
+    //         if (ability1Active || isPossessing)
+    //             return;
 
-        float closestDist = Mathf.Infinity;
-        EnemyScript closest = null;
+    //         if (currentAbilityCharge < maxAbilityCharge)
+    //             return;
 
-        foreach (EnemyScript e in enemies)
-        {
-            if (e == null || e.gameObject == gameObject)
-            {
-                continue;
-            }
+    //         currentAbilityCharge = 0f;
+
+    //         StartAbility1(); 
+    //     }
+
+    //     if (!isPossessing)
+    //     {
+    //         return;
+    //     }
+
+    //     if (Input.GetKeyDown(KeyCode.E))
+    //     {
+    //         SwitchPossessionTarget();
+    //     }
+
+    //     possessionTimer -= Time.deltaTime;
+
+    //     if (possessionTimer <= 0f)
+    //     {
+    //         EndPossession();
+    //     }
+    // }
+    // private void StartPossession()
+    // {
+    //     isPossessing = true;
+    //     possessionTimer = possessionDuration;
+
+    //     SwitchPossessionTarget();
+    // }
+
+    // private void EndPossession()
+    // {
+    //     Cursor.lockState = CursorLockMode.Locked;
+    //     Cursor.visible = false;
+    //     isPossessing = false;
+
+    //     if (currentPossessed != null)
+    //     {
+    //         currentPossessed.SetPossessed(false, null);
+    //         currentPossessed = null;
+    //     }
+
+    //     if (cam != null)
+    //     {
+    //         cam.SetTarget(transform);
+    //     }
+    // }
+
+    // private void SwitchPossessionTarget()
+    // {
+    //     EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();
+
+    //     float closestDist = Mathf.Infinity;
+    //     EnemyScript closest = null;
+
+    //     foreach (EnemyScript e in enemies)
+    //     {
+    //         if (e == null || e.gameObject == gameObject)
+    //         {
+    //             continue;
+    //         }
                 
 
-            EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
+    //         EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
 
-            if (ep != null && ep.IsPossessed())
-            {
-                continue;
-            }
+    //         if (ep != null && ep.IsPossessed())
+    //         {
+    //             continue;
+    //         }
                 
 
-            float dist = Vector3.Distance(transform.position, e.transform.position);
+    //         float dist = Vector3.Distance(transform.position, e.transform.position);
 
-            if (dist < closestDist)
-            {
-                closestDist = dist;
-                closest = e;
-            }
-        }
+    //         if (dist < closestDist)
+    //         {
+    //             closestDist = dist;
+    //             closest = e;
+    //         }
+    //     }
 
-        if (closest == null)
-        {
-            return;
-        }
+    //     if (closest == null)
+    //     {
+    //         return;
+    //     }
             
 
-        // unpossess old
-        if (currentPossessed != null)
-        {
-            currentPossessed.SetPossessed(false, null);
-        }
+    //     // unpossess old
+    //     if (currentPossessed != null)
+    //     {
+    //         currentPossessed.SetPossessed(false, null);
+    //     }
 
-        EnemyPossessionController controller = closest.GetComponent<EnemyPossessionController>();
+    //     EnemyPossessionController controller = closest.GetComponent<EnemyPossessionController>();
 
-        if (controller == null)
-        {
-            controller = closest.gameObject.AddComponent<EnemyPossessionController>();
-        }
+    //     if (controller == null)
+    //     {
+    //         controller = closest.gameObject.AddComponent<EnemyPossessionController>();
+    //     }
             
 
-        controller.SetPossessed(true, Camera.main.transform);
+    //     controller.SetPossessed(true, Camera.main.transform);
 
-        currentPossessed = controller;
+    //     currentPossessed = controller;
 
-        if (cam != null)
-        {
-            cam.SetTarget(closest.transform);
-        }
-    }
+    //     if (cam != null)
+    //     {
+    //         cam.SetTarget(closest.transform);
+    //     }
+    // }
 
-    public bool IsPossessing()
-    {
-        return isPossessing;
-    }
+    // public bool IsPossessing()
+    // {
+    //     return isPossessing;
+    // }
 
-    private void HandlePossessedAI()
-    {
-        if (GetComponent<PlayerPossessedAI>() == null)
-        {
-            return;
-        }
+    // private void HandlePossessedAI()
+    // {
+    //     if (GetComponent<PlayerPossessedAI>() == null)
+    //     {
+    //         return;
+    //     }
 
-    }
+    // }
 
     public void ForceAttack()
     {
@@ -768,74 +792,74 @@ public class PlayerCombat : MonoBehaviour
     }
 
 
-    private void HandleAbility1()
-    {
-        if (!ability1Active)
-        {
-            return;
-        }
+    // private void HandleAbility1()
+    // {
+    //     if (!ability1Active)
+    //     {
+    //         return;
+    //     }
             
 
-        ability1Timer -= Time.deltaTime;
+    //     ability1Timer -= Time.deltaTime;
 
-        if (ability1Timer <= 0f)
-        {
-            EndAbility1();
-            return;
-        }
+    //     if (ability1Timer <= 0f)
+    //     {
+    //         EndAbility1();
+    //         return;
+    //     }
 
-        HandleAbility1Click();
-    }
+    //     HandleAbility1Click();
+    // }
 
-    private void StartAbility1()
-    {
-        isPossessing = true;
-        ability1Active = true;
-        possessionTimer = possessionDuration;
+    // private void StartAbility1()
+    // {
+    //     isPossessing = true;
+    //     ability1Active = true;
+    //     possessionTimer = possessionDuration;
 
-        SwitchPossessionTarget();
-    }
+    //     SwitchPossessionTarget();
+    // }
 
-    private void EndAbility1()
-    {
-        ability1Active = false;
+    // private void EndAbility1()
+    // {
+    //     ability1Active = false;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+    //     Cursor.lockState = CursorLockMode.Locked;
+    //     Cursor.visible = false;
 
-        Debug.Log("Ability 1 ended");
-    }
+    //     Debug.Log("Ability 1 ended");
+    // }
 
 
-    private void HandleAbility1Click()
-    {
-        if (!Input.GetMouseButtonDown(0))
-        {
-            return;
-        }
+    // private void HandleAbility1Click()
+    // {
+    //     if (!Input.GetMouseButtonDown(0))
+    //     {
+    //         return;
+    //     }
             
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-        {
-            EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
+    //     if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+    //     {
+    //         EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
 
-            if (enemy == null)
-            {
-                return;
-            }
+    //         if (enemy == null)
+    //         {
+    //             return;
+    //         }
                 
 
-            enemy.TakeDamage(20f);
+    //         enemy.TakeDamage(20f);
 
-            Vector3 dir = (enemy.transform.position - Camera.main.transform.position);
-            dir.y = 0f;
+    //         Vector3 dir = (enemy.transform.position - Camera.main.transform.position);
+    //         dir.y = 0f;
 
-            enemy.ApplyKnockback(dir, 6f);
+    //         enemy.ApplyKnockback(dir, 6f);
             
-        }
-    }
+    //     }
+    // }
 
     private IEnumerator PushEnemy(CharacterController cc, Vector3 dir)
     {

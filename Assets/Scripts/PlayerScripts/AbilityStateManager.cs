@@ -9,6 +9,9 @@ public class AbilityStateManager : MonoBehaviour
     public bool isAbilityActive;
     public bool isFreezeAbilityActive;
 
+    public bool isCameraThrowActive;
+
+
     private void Awake()
     {
         Instance = this;

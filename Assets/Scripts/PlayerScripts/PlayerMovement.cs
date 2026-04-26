@@ -71,6 +71,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private GameObject dodgeVFX;
     [SerializeField] private Transform dodgeVFXSpawnPoint;
 
+    private ThirdPersonCamera cam;
+
     private float lastATapTime;
     private float lastDTapTime;
     private float lastSTapTime;
@@ -87,15 +89,15 @@ public class PlayerMovement : MonoBehaviour
 
     public bool isPossessed;
 
-    [Header("Ability 3 - Time Freeze")]
-    [SerializeField] private float timeFreezeDuration = 4f;
-    [SerializeField] private float freezeTimeScale = 0.05f;
-    [SerializeField] private float pushForce = 8f;
-    [SerializeField] private LayerMask enemyLayer;
-    [SerializeField] private GameObject freezeUI;
+    //[Header("Ability 3 - Time Freeze")]
+    // [SerializeField] private float timeFreezeDuration = 4f;
+    // [SerializeField] private float freezeTimeScale = 0.05f;
+    // [SerializeField] private float pushForce = 8f;
+    // [SerializeField] private LayerMask enemyLayer;
+    // [SerializeField] private GameObject freezeUI;
 
-    private bool isTimeFrozenAbilityActive;
-    private float freezeTimer;
+    // private bool isTimeFrozenAbilityActive;
+    // private float freezeTimer;
 
     private void Awake()
     {
@@ -106,6 +108,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         //references
+        cam = cameraObject.GetComponent<ThirdPersonCamera>();
         controller = GetComponent<CharacterController>();
         combat = GetComponent<PlayerCombat>();
 
@@ -136,20 +139,25 @@ public class PlayerMovement : MonoBehaviour
         animDodgeBack = Animator.StringToHash("DodgeBack");
     }
 
+    private bool IsMovementLocked()
+    {
+        return AbilityStateManager.Instance != null &&
+        (
+            AbilityStateManager.Instance.isCameraThrowActive ||
+            AbilityStateManager.Instance.isFreezeAbilityActive ||
+            isPossessed ||
+            (GetComponent<PossessionAbility>() != null && GetComponent<PossessionAbility>().IsPossessing)
+        );
+    }
+
     private void Update()
     {
-        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        if (IsMovementLocked())
         {
-            return;
-        }
-        if (isPossessed)
-        {
-            return;
-        }
-        PlayerCombat combat = GetComponent<PlayerCombat>();
+            speed = 0f;
+            verticalSpeed = 0f;
 
-        if (combat != null && combat.IsPossessing())
-        {
+            controller.Move(Vector3.zero);
             return;
         }
 
@@ -159,9 +167,11 @@ public class PlayerMovement : MonoBehaviour
         Movement();
         HandleDodge();
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (cam != null)
         {
-            StartCoroutine(TimeFreezeAbility());
+            Vector3 euler = transform.eulerAngles;
+            euler.y = cam.GetYaw();
+            transform.eulerAngles = euler;
         }
     }
 
@@ -572,87 +582,87 @@ public class PlayerMovement : MonoBehaviour
         cameraTarget.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
     }
 
-    private IEnumerator TimeFreezeAbility()
-    {
-        Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
+    // private IEnumerator TimeFreezeAbility()
+    // {
+    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
 
-        if (isTimeFrozenAbilityActive)
-        {
-            yield break;
-        }
+    //     if (isTimeFrozenAbilityActive)
+    //     {
+    //         yield break;
+    //     }
             
 
-        isTimeFrozenAbilityActive = true;
-        freezeTimer = timeFreezeDuration;
+    //     isTimeFrozenAbilityActive = true;
+    //     freezeTimer = timeFreezeDuration;
 
-        if (freezeUI != null)
-        {
-            freezeUI.SetActive(true);
-        }
+    //     if (freezeUI != null)
+    //     {
+    //         freezeUI.SetActive(true);
+    //     }
             
 
-        Time.timeScale = freezeTimeScale;
-        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+    //     Time.timeScale = freezeTimeScale;
+    //     Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
-        Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(true);
+    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(true);
 
-        while (freezeTimer > 0f)
-        {
-            freezeTimer -= Time.unscaledDeltaTime;
+    //     while (freezeTimer > 0f)
+    //     {
+    //         freezeTimer -= Time.unscaledDeltaTime;
 
-            HandleFrozenClick();
+    //         HandleFrozenClick();
 
-            yield return null;
-        }
+    //         yield return null;
+    //     }
 
-        Time.timeScale = 1f;
-        Time.fixedDeltaTime = 0.02f;
+    //     Time.timeScale = 1f;
+    //     Time.fixedDeltaTime = 0.02f;
 
-        if (freezeUI != null)
-        {
-            freezeUI.SetActive(false);
-        }
+    //     if (freezeUI != null)
+    //     {
+    //         freezeUI.SetActive(false);
+    //     }
             
 
-        Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(false);
-        Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
+    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(false);
+    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
 
-        isTimeFrozenAbilityActive = false;
+    //     isTimeFrozenAbilityActive = false;
 
         
-    }
+    // }
 
 
-    private void HandleFrozenClick()
-    {
-        if (!Input.GetMouseButtonDown(0))
-        {
-            return;
-        }
+    // private void HandleFrozenClick()
+    // {
+    //     if (!Input.GetMouseButtonDown(0))
+    //     {
+    //         return;
+    //     }
             
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, enemyLayer))
-        {
-            EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
+    //     if (Physics.Raycast(ray, out RaycastHit hit, 100f, enemyLayer))
+    //     {
+    //         EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
 
-            if (enemy != null)
-            {
-                Vector3 dir = (enemy.transform.position - Camera.main.transform.position).normalized;
+    //         if (enemy != null)
+    //         {
+    //             Vector3 dir = (enemy.transform.position - Camera.main.transform.position).normalized;
 
-                enemy.TakeDamage(10f);
+    //             enemy.TakeDamage(10f);
 
-                Rigidbody rb = enemy.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    rb.AddForce(dir * pushForce, ForceMode.Impulse);
-                }
-                else
-                {
-                    enemy.transform.position += dir * pushForce * 0.1f;
-                }
-            }
-        }
-    }
+    //             Rigidbody rb = enemy.GetComponent<Rigidbody>();
+    //             if (rb != null)
+    //             {
+    //                 rb.AddForce(dir * pushForce, ForceMode.Impulse);
+    //             }
+    //             else
+    //             {
+    //                 enemy.transform.position += dir * pushForce * 0.1f;
+    //             }
+    //         }
+    //     }
+    // }
 }

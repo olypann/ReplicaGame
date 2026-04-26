@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - Enemy
+  - CameraBody
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - CameraBody
   - Camera
   - Wall
-  - 
+  - Sword
   - 
   - 
   - 

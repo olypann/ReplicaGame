@@ -12,7 +12,6 @@ void ToonShading_float(
 
 #ifdef SHADERGRAPH_PREVIEW
 
-    // just something so shader graph doesn't freak out in preview
     celRampOutput = float3(0.5, 0.5, 0.0);
     lightDirection = float3(1.0, 0.0, 0.0);
 
@@ -31,7 +30,6 @@ void ToonShading_float(
 
     Light mainLight;
 
-    // grabbing main light, sometimes with shadows sometimes not
     #if _MAIN_LIGHT_SHADOWS_CASCADE || _MAIN_LIGHT_SHADOWS
         mainLight = GetMainLight(shadowCoord);
     #else
@@ -40,14 +38,12 @@ void ToonShading_float(
 
     float ndotlMain = saturate(dot(normal, mainLight.direction));
 
-    // basic toon ramp for main light
     float mainCel = smoothstep(
         celRampOffset,
         celRampOffset + celRampSmoothness,
         ndotlMain
     );
 
-    // shadows from main light
     mainCel *= mainLight.shadowAttenuation;
 
     result += mainLight.color * mainCel;

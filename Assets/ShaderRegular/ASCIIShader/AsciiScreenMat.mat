@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GradientTex:
-        m_Texture: {fileID: 2800000, guid: 5c2df7c10b772104caa34e40d5c7be77, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0c441065b0017634ca26230b561ed869, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
@@ -42,23 +42,23 @@ Material:
     - _ColorVariation: 0.475
     - _Columns: 10
     - _Contrast: 5.38
-    - _GradientStrength: 0.963
+    - _GradientStrength: 1
     - _Intensity: 1.13
     - _NoiseScale: 0.57
     - _NoiseSpeed: 1
     - _NoiseStrength: 0.5
-    - _RandomStrength: 0.412
+    - _RandomStrength: 0.346
     - _Rows: 10
     - _Seed: 2.52
-    - _ShuffleSpeed: 3.04
+    - _ShuffleSpeed: 7.87
     - _UseBaseTexture: 1
     - _UseColor: 1.24
     - _UseGradient: 1.27
-    - _WaveSpeed: 0.52
-    - _WaveStrength: 0.18
-    - _Zoom: 3.3
+    - _WaveSpeed: 0.8
+    - _WaveStrength: 0.09
+    - _Zoom: 2.8
     m_Colors:
-    - _BaseColor: {r: 0.81805927, g: 0.7028302, b: 1, a: 1}
+    - _BaseColor: {r: 0.6294552, g: 0.43394, b: 0.9292453, a: 1}
     - _CharColor: {r: 0.9764151, g: 0.51584196, b: 0.590819, a: 1}
     - _ColorA: {r: 1, g: 0.74248385, b: 0.254717, a: 1}
     - _ColorB: {r: 1, g: 0.3066038, b: 0.3066038, a: 1}
