@@ -57,6 +57,15 @@ public class ThirdPersonCamera : MonoBehaviour
 
     [SerializeField] private float breatheAmount = 0.03f;
     [SerializeField] private float breatheSpeed = 1.2f;
+
+    [Header("Aim Breathing (Inspector Controlled)")]
+    [SerializeField] private float aimBreathAmount = 0.03f;
+    [SerializeField] private float aimBreathSpeed = 2.5f;
+
+    // [Header("Camera Anchors")]
+    // [SerializeField] private Transform defaultCameraAnchor;
+
+    
     private float motionTime;
 
     private Vector3 dodgeImpulse;
@@ -100,6 +109,17 @@ public class ThirdPersonCamera : MonoBehaviour
     private Quaternion frozenRotation;
     private Vector3 shakeOffset;
 
+    [Header("Camera Throw FX")]
+    [SerializeField] private float throwSwayAmount = 0.05f;
+    [SerializeField] private float throwSwaySpeed = 2f;
+    [SerializeField] private float throwSwayReturnSpeed = 6f;
+
+    private Vector3 throwSwayOffset;
+    private Vector3 throwSwayVelocity;
+
+    [SerializeField] private float throwImpulseReturnSpeed = 14f;
+    private Vector3 throwCameraImpulse;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -115,8 +135,11 @@ public class ThirdPersonCamera : MonoBehaviour
     private void LateUpdate()
     {
         
-        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isCameraThrowActive)
+        if (AbilityStateManager.Instance != null &&
+            (AbilityStateManager.Instance.isCameraThrowActive ||
+            AbilityStateManager.Instance.isCameraReturning))
         {
+            ApplyAbilityCameraOverride();
             return;
         }
 
@@ -230,17 +253,37 @@ public class ThirdPersonCamera : MonoBehaviour
         Vector3 frameVelocity = (transform.position - lastPosition) / Time.deltaTime;
         Vector3 overshoot = frameVelocity * overshootStrength;
 
+        Vector3 shakeApplied = shakeOffset;
+        Vector3 targetSway =
+            transform.right * Mathf.Sin(Time.time * throwSwaySpeed) * throwSwayAmount +
+            transform.up * Mathf.Cos(Time.time * throwSwaySpeed * 0.8f) * (throwSwayAmount * 0.5f);
+
+        throwSwayOffset = Vector3.Lerp(
+            throwSwayOffset,
+            targetSway,
+            Time.deltaTime * throwSwayReturnSpeed
+        );
+
+        // THROW IMPULSE decay
+        Vector3 basePos = desiredPosition + overshoot + throwSwayOffset + throwCameraImpulse;
+
+        // proper screen shake (additive AFTER smoothing)
+        Vector3 shake = new Vector3(shakeOffset.x, shakeOffset.y, 0f);
+
+        // final smoothed position
         Vector3 finalPos = Vector3.Lerp(
             transform.position,
-            desiredPosition + overshoot,
+            basePos,
             Time.deltaTime * smoothSpeed
         );
 
-        // APPLY SHAKE HERE (THIS IS THE IMPORTANT SPOT)
-        finalPos += new Vector3(shakeX, shakeY, 0f);
+        // apply shake ONCE, consistently
 
+        finalPos += shake;
+        // SINGLE assignment only
         transform.position = finalPos;
 
+        shakeOffset = Vector3.Lerp(shakeOffset, Vector3.zero, Time.deltaTime * 20f);
         lastPosition = transform.position;
 
         dodgeImpulse = Vector3.Lerp(
@@ -352,9 +395,9 @@ public class ThirdPersonCamera : MonoBehaviour
             return;
         }
 
-        currentTarget = target;
+        // preserve smooth blending
+        currentTarget = targetGoal != null ? targetGoal : target;
         targetGoal = newTarget;
-        target = newTarget;
 
         targetBlendT = 0f;
     }
@@ -467,6 +510,100 @@ public class ThirdPersonCamera : MonoBehaviour
     public float GetYaw()
     {
         return yaw;
+    }
+
+    private void ApplyAbilityCameraOverride()
+    {
+        // decay shake
+        shakeOffset = Vector3.Lerp(shakeOffset, Vector3.zero, Time.deltaTime * 20f);
+
+        // horizontal breathing (forward/back in camera space)
+        float breathe = Mathf.Sin(Time.time * aimBreathSpeed) * aimBreathAmount;
+
+        Vector3 breatheOffset = transform.forward * breathe;
+
+        transform.position += shakeOffset + breatheOffset;
+    }
+
+    public void AddThrowCameraImpulse(Vector3 impulse)
+    {
+        throwCameraImpulse += impulse;
+    }
+
+    public void ClearThrowCameraImpulse()
+    {
+        throwCameraImpulse = Vector3.zero;
+    }
+
+    public void ResetAfterCameraThrow()
+    {
+        throwCameraImpulse = Vector3.zero;
+        throwSwayOffset = Vector3.zero;
+        throwSwayVelocity = Vector3.zero;
+
+        shakeOffset = Vector3.zero;
+
+        lastPosition = transform.position;
+
+        // IMPORTANT: prevents sudden camera "spin correction"
+        // resync smoothing baseline
+    }
+
+    public void ResetState()
+    {
+        // Clear any “special mode” flags that might persist after possession/freeze
+        // Only keep what exists in your script
+
+        // Example safe resets (remove ones you don’t have)
+        // isFrozen = false;
+        // isChargeZoom = false;
+
+        // Reset any smoothing leftovers if you use them
+        // velocity = Vector3.zero;
+    }
+
+    public void ForceSnapToTarget()
+    {
+        if (target == null)
+            return;
+
+        transform.position = target.position;
+        transform.rotation = target.rotation;
+    }
+
+    public void RestoreNormalControl()
+    {
+        frozen = false;
+
+        // resume normal target smoothly
+        currentTarget = transform;   // temporary anchor (prevents snap)
+        targetGoal = target;
+        targetBlendT = 0f;
+
+        shakeOffset = Vector3.zero;
+        dodgeImpulse = Vector3.zero;
+        externalImpulse = Vector3.zero;
+        throwCameraImpulse = Vector3.zero;
+
+        lastPosition = transform.position;
+    }
+
+    public void SnapToTargetInstant(Transform newTarget)
+    {
+        if (newTarget == null)
+            return;
+
+        currentTarget = newTarget;
+        targetGoal = newTarget;
+        target = newTarget;
+
+        targetBlendT = 1f;
+
+        Vector3 blendedTargetPos = newTarget.position;
+
+        Vector3 offset = transform.position - blendedTargetPos;
+
+        transform.position = blendedTargetPos + offset;
     }
 
     

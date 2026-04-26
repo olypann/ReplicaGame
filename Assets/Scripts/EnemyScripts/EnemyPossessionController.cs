@@ -177,4 +177,9 @@ public class EnemyPossessionController : MonoBehaviour
             yield return null;
         }
     }
+
+    public bool IsValidTarget()
+    {
+        return this != null && gameObject != null;
+    }
 }

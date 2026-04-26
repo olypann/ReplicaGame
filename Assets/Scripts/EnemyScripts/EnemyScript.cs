@@ -378,15 +378,23 @@ public class EnemyScript : MonoBehaviour
     private void Die()
     {
         if (isDead)
-        {
             return;
-        }
 
         isDead = true;
 
+        StopAllCoroutines();
+
+        // disable behaviour immediately
+        enabled = false;
+
         Debug.Log("Enemy died");
 
-        Destroy(gameObject);
+        Destroy(gameObject, 0.05f);
+    }
+
+    public bool IsDead()
+    {
+        return isDead;
     }
 
 

@@ -11,10 +11,17 @@ public class AbilityStateManager : MonoBehaviour
 
     public bool isCameraThrowActive;
 
+    public bool isCameraReturning;
+
 
     private void Awake()
     {
         Instance = this;
+    }
+
+    public bool IsAnyAbilityActive()
+    {
+        return isAbilityActive || isCameraThrowActive || isFreezeAbilityActive;
     }
 
     

@@ -7,6 +7,8 @@ public class PossessionAbility : MonoBehaviour
     [SerializeField] private float maxChargeRequired = 100f;
     [SerializeField] private float possessionDuration = 15f;
 
+    private PlayerMovement movement;
+
     private PlayerCombat combat;
     private ThirdPersonCamera cam;
 
@@ -21,6 +23,8 @@ public class PossessionAbility : MonoBehaviour
     {
         combat = GetComponent<PlayerCombat>();
         cam = Camera.main.GetComponent<ThirdPersonCamera>();
+
+        movement = GetComponent<PlayerMovement>();
     }
 
     private void Update()
@@ -33,6 +37,12 @@ public class PossessionAbility : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
+            if (AbilityStateManager.Instance != null &&
+                AbilityStateManager.Instance.IsAnyAbilityActive())
+            {
+                return;
+            }
+
             if (isPossessing)
             {
                 return;
@@ -65,6 +75,7 @@ public class PossessionAbility : MonoBehaviour
 
     private void StartPossession()
     {
+        AbilityStateManager.Instance.isAbilityActive = true;
         isPossessing = true;
         possessionTimer = possessionDuration;
 
@@ -93,6 +104,7 @@ public class PossessionAbility : MonoBehaviour
 
     private void EndPossession()
     {
+        AbilityStateManager.Instance.isAbilityActive = false;
         isPossessing = false;
 
         if (currentPossessed != null)
@@ -103,7 +115,8 @@ public class PossessionAbility : MonoBehaviour
 
         if (cam != null)
         {
-            cam.SetTarget(transform);
+            cam.RestoreNormalControl();
+            cam.SnapToTargetInstant(transform);
         }
 
         if (AbilityStateManager.Instance != null)
@@ -167,5 +180,97 @@ public class PossessionAbility : MonoBehaviour
         {
             cam.SetTarget(closest.transform);
         }
+    }
+
+    private void LateUpdate()
+    {
+        ValidateCurrentPossession();
+    }
+
+    private void ValidateCurrentPossession()
+    {
+        if (!isPossessing)
+            return;
+
+        if (!currentPossessed.IsValidTarget())
+        {
+            SwitchTargetOrEnd();
+        }
+
+        if (currentPossessed == null)
+        {
+            SwitchTargetOrEnd();
+            return;
+        }
+
+        EnemyScript enemy = null;
+        if (currentPossessed != null)
+        {
+            enemy = currentPossessed.GetComponent<EnemyScript>();
+        }        
+
+        if (enemy == null || enemy.IsDead()) // assume you have IsDead or similar
+        {
+            SwitchTargetOrEnd();
+        }
+    }
+
+    private void SwitchTargetOrEnd()
+    {
+        EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();
+
+        EnemyScript next = null;
+        float closest = Mathf.Infinity;
+
+        foreach (var e in enemies)
+        {
+            if (e == null) continue;
+
+            EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
+
+            if (ep != null && ep.IsPossessed())
+                continue;
+
+            float dist = Vector3.Distance(transform.position, e.transform.position);
+
+            if (dist < closest)
+            {
+                closest = dist;
+                next = e;
+            }
+        }
+
+        if (next != null)
+        {
+            SwitchTo(next);
+            return;
+        }
+
+        // force camera reset BEFORE ending possession
+        cam?.RestoreNormalControl();
+        cam?.SnapToTargetInstant(transform);
+
+        EndPossession();
+    }
+
+    private void SwitchTo(EnemyScript target)
+    {
+        SoundManager.Instance?.PlayPossessionSwitch();
+
+        if (currentPossessed != null)
+        {
+            currentPossessed.SetPossessed(false, null);
+        }
+
+        EnemyPossessionController controller = target.GetComponent<EnemyPossessionController>();
+
+        if (controller == null)
+            controller = target.gameObject.AddComponent<EnemyPossessionController>();
+
+        controller.SetPossessed(true, Camera.main.transform);
+
+        currentPossessed = controller;
+
+        cam?.SnapToTargetInstant(target.transform);
     }
 }

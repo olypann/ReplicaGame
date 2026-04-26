@@ -35,10 +35,25 @@ public class CameraThrowAbility : MonoBehaviour
     [SerializeField] private float returnSpeed = 8f;
     [SerializeField] private float lingerTime = 0.6f;
 
+    [Header("Camera Anchors")]
+    [SerializeField] private Transform defaultCameraAnchor;
+
+    [Header("Aiming Feel")]
+    [SerializeField] private float aimRotateSpeed = 2f;
+    [SerializeField] private float swayAmount = 0.05f;
+    [SerializeField] private float swaySpeed = 4f;
+
+    [Header("Animation")]
+    [SerializeField] private Animator animator;
+    [SerializeField] private string removeWeaponAnim = "WeaponRemove";
+
+    private Vector3 returnTargetPosition;
+
     private bool active;
     private bool aiming;
     private bool thrown;
     private bool hitEnemy;
+    private bool returning;
 
     private float timer;
     private Vector3 lastForward;
@@ -53,6 +68,11 @@ public class CameraThrowAbility : MonoBehaviour
         if (combat == null)
         {
             combat = GetComponent<PlayerCombat>();
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
         }
 
         if (timerText != null)
@@ -73,6 +93,11 @@ public class CameraThrowAbility : MonoBehaviour
             return;
         }
 
+        if (returning)
+        {
+            return;
+        }
+
         HandleAim();
 
         if (Input.GetKeyDown(KeyCode.E) && aiming && !thrown)
@@ -85,6 +110,12 @@ public class CameraThrowAbility : MonoBehaviour
 
     private void TryStart()
     {
+        if (AbilityStateManager.Instance != null &&
+        AbilityStateManager.Instance.IsAnyAbilityActive())
+        {
+            return;
+        }
+
         if (active)
         {
             return;
@@ -103,9 +134,14 @@ public class CameraThrowAbility : MonoBehaviour
     private IEnumerator StartAbility()
     {
         active = true;
+
+        AbilityStateManager.Instance.isAbilityActive = true;
+        AbilityStateManager.Instance.isCameraThrowActive = true;
+
         aiming = true;
         thrown = false;
         hitEnemy = false;
+        returning = false;
 
         timer = abilityDuration;
 
@@ -116,7 +152,17 @@ public class CameraThrowAbility : MonoBehaviour
             timerText.gameObject.SetActive(true);
         }
 
+        if (animator != null)
+        {
+            animator.Play(removeWeaponAnim);
+        }
+        //SoundManager.Instance?.PlayCameraGrab();
+
+        returnTargetPosition = defaultCameraAnchor.position;
+
         yield return MoveToAnchor();
+
+        cam.AddShake(Random.insideUnitSphere * 0.15f);
     }
 
     private IEnumerator MoveToAnchor()
@@ -124,15 +170,18 @@ public class CameraThrowAbility : MonoBehaviour
         float t = 0f;
 
         Vector3 start = cam.transform.position;
-        Vector3 target = aimAnchor.position;
+        Quaternion startRot = cam.transform.rotation;
+
+        SoundManager.Instance?.PlayCameraGrab();
 
         while (t < 1f)
         {
             t += Time.deltaTime * 8f;
 
-            cam.transform.position = Vector3.Lerp(start, target, t);
-
-            ApplyShake(aimShake);
+            cam.transform.position = Vector3.Lerp(start, aimAnchor.position, t);
+            Vector3 lookPos = player.position + player.forward * 3f + Vector3.up * 1.4f;
+            Quaternion targetRot = Quaternion.LookRotation(lookPos - aimAnchor.position);
+            cam.transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
 
             yield return null;
         }
@@ -148,24 +197,32 @@ public class CameraThrowAbility : MonoBehaviour
         float mx = Input.GetAxis("Mouse X");
         float my = Input.GetAxis("Mouse Y");
 
-        cam.transform.RotateAround(player.position, Vector3.up, mx * 2f);
-        cam.transform.RotateAround(player.position, cam.transform.right, -my * 2f);
+        cam.transform.RotateAround(player.position, Vector3.up, mx * aimRotateSpeed);
+        cam.transform.RotateAround(player.position, cam.transform.right, -my * aimRotateSpeed);
 
-        ApplyShake(aimShake);
+        Vector3 sway =
+            cam.transform.right * Mathf.Sin(Time.time * swaySpeed) * swayAmount +
+            cam.transform.up * Mathf.Cos(Time.time * swaySpeed * 0.8f) * (swayAmount * 0.5f);
+
+        cam.transform.position += sway;
 
         lastForward = cam.transform.forward;
     }
 
     private IEnumerator Throw()
     {
+        
+        SoundManager.Instance?.PlayCameraThrow();
         thrown = true;
         aiming = false;
         hitEnemy = false;
 
+        bool hitSomething = false;
+
         float t = 0f;
         float speed = 0f;
 
-        while (t < throwDuration)
+        while (t < throwDuration || !hitSomething)
         {
             t += Time.deltaTime;
 
@@ -176,59 +233,96 @@ public class CameraThrowAbility : MonoBehaviour
 
             if (Physics.Raycast(cam.transform.position, lastForward, out RaycastHit hit, move.magnitude, hitMask, QueryTriggerInteraction.Ignore))
             {
-                Debug.Log($"Camera HIT: {hit.collider.name} | Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)} | Point: {hit.point}");
-
                 cam.transform.position = hit.point;
+                hitSomething = true;
+
+                SoundManager.Instance?.PlayCameraHit();
+
+                DamageArea(hit.point);
+
+                cam.AddShake(Random.insideUnitSphere * hitShake);
+
                 break;
-            }
-            else
-            {
-                Debug.Log("Camera HIT: NOTHING");
             }
 
             cam.transform.position += move;
 
-            ApplyShake(0.03f);
-
             yield return null;
         }
 
-        if (!hitEnemy)
+        if (!hitSomething)
         {
-            ApplyShake(missShake);
+            cam.AddThrowCameraImpulse(-cam.transform.forward * missShake);
             yield return new WaitForSeconds(lingerTime);
-        }
-        else
-        {
-            ApplyShake(hitShake);
         }
 
         yield return ReturnCamera();
     }
 
+    private void DamageArea(Vector3 point)
+    {
+        Collider[] hits = Physics.OverlapSphere(point, hitRadius, enemyLayer);
+
+        foreach (Collider hit in hits)
+        {
+            EnemyScript enemy = hit.GetComponentInParent<EnemyScript>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(damage);
+
+                Vector3 dir = (enemy.transform.position - point).normalized;
+
+                enemy.ApplyKnockback(dir, knockback);
+
+                hitEnemy = true;
+            }
+        }
+    }
+
     private IEnumerator ReturnCamera()
     {
+        if (returning)
+        {
+            yield break;
+        }
+
+        returning = true;
+
+        AbilityStateManager.Instance.isCameraReturning = true;
+
         float t = 0f;
 
         Vector3 start = cam.transform.position;
-        Vector3 target = player.position + Vector3.up * 1.6f - player.forward * 3.2f;
+        Quaternion startRot = cam.transform.rotation;
 
         while (t < 1f)
         {
             t += Time.deltaTime * returnSpeed;
 
-            cam.transform.position = Vector3.Lerp(start, target, t);
+            cam.transform.position = Vector3.Lerp(start, defaultCameraAnchor.position, t);
+            cam.transform.rotation = Quaternion.Slerp(startRot, defaultCameraAnchor.rotation, t);
 
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.4f);
+        if (cam != null)
+        {
+            cam.ClearThrowCameraImpulse();
+            cam.ResetAfterCameraThrow();
+        }
 
-        aiming = false;
         active = false;
-        thrown = false;
 
         AbilityStateManager.Instance.isCameraThrowActive = false;
+        AbilityStateManager.Instance.isAbilityActive = false;
+
+        aiming = false;
+        thrown = false;
+        returning = false;
+
+        AbilityStateManager.Instance.isCameraThrowActive = false;
+        AbilityStateManager.Instance.isCameraReturning = false;
 
         if (timerText != null)
         {
@@ -238,11 +332,6 @@ public class CameraThrowAbility : MonoBehaviour
 
     private void UpdateTimer()
     {
-        if (!active)
-        {
-            return;
-        }
-
         timer -= Time.deltaTime;
 
         if (timerText != null)
@@ -250,41 +339,9 @@ public class CameraThrowAbility : MonoBehaviour
             timerText.text = Mathf.Ceil(timer).ToString();
         }
 
-        if (timer <= 0f)
+        if (timer <= 0f && !returning)
         {
             StartCoroutine(ReturnCamera());
         }
-    }
-
-    private void ApplyShake(float strength)
-    {
-        if (cam == null)
-        {
-            return;
-        }
-
-        cam.AddShake(Random.insideUnitSphere * strength);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (!thrown) return;
-
-        if (((1 << other.gameObject.layer) & hitMask) == 0)
-            return;
-
-        EnemyScript enemy = other.GetComponentInParent<EnemyScript>();
-
-        if (enemy == null)
-            return;
-
-        hitEnemy = true;
-
-        enemy.TakeDamage(damage);
-
-        Vector3 dir = (enemy.transform.position - cam.transform.position).normalized;
-        enemy.ApplyKnockback(dir, knockback);
-
-        ApplyShake(hitShake);
     }
 }

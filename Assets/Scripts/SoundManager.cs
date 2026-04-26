@@ -47,6 +47,20 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioSource abilityFull;
     [SerializeField] private AudioSource abilityUse;
 
+    [SerializeField] private AudioSource freezeClickHit;
+    [SerializeField] private AudioSource cameraGrab;
+    [SerializeField] private AudioSource cameraThrow;
+    [SerializeField] private AudioSource cameraHit;
+
+    [Header("Camera Ability")]
+    [SerializeField] private AudioSource cameraHitEnemy;
+
+    [Header("Freeze Ability")]
+    [SerializeField] private AudioSource freezeClickEnemy;
+
+    [Header("Possession")]
+    [SerializeField] private AudioSource possessionSwitch;
+
     private void Awake()
     {
         Instance = this;
@@ -139,4 +153,16 @@ public class SoundManager : MonoBehaviour
     // ability
     public void PlayAbilityFull() => abilityFull?.Play();
     public void PlayAbilityUse() => abilityUse?.Play();
+
+    public void PlayFreezeClickHit() => freezeClickHit?.Play();
+
+    public void PlayCameraGrab() => cameraGrab?.Play();
+
+    public void PlayCameraThrow() => cameraThrow?.Play();
+
+    public void PlayCameraHit() => cameraHit?.Play();
+
+    public void PlayFreezeClickEnemy() => freezeClickEnemy?.Play();
+
+    public void PlayPossessionSwitch() => possessionSwitch?.Play();
 }

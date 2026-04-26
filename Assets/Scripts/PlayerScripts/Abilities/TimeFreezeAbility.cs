@@ -10,6 +10,9 @@ public class TimeFreezeAbility : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private GameObject freezeUI;
 
+    [Header("fx")]
+    [SerializeField] private GameObject clickHitVFX;
+
     private bool isActive;
     private float timer;
 
@@ -19,10 +22,17 @@ public class TimeFreezeAbility : MonoBehaviour
     {
         combat = GetComponent<PlayerCombat>();
     }
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
+            if (AbilityStateManager.Instance != null &&
+                AbilityStateManager.Instance.IsAnyAbilityActive())
+            {
+                return;
+            }
+
             if (!isActive)
             {
                 if (combat == null)
@@ -56,6 +66,8 @@ public class TimeFreezeAbility : MonoBehaviour
         }
 
         isActive = true;
+        AbilityStateManager.Instance.isAbilityActive = true;
+        AbilityStateManager.Instance.isFreezeAbilityActive = true;
         timer = duration;
 
         if (freezeUI != null)
@@ -101,6 +113,9 @@ public class TimeFreezeAbility : MonoBehaviour
         Cursor.visible = false;
 
         isActive = false;
+
+        AbilityStateManager.Instance.isFreezeAbilityActive = false;
+        AbilityStateManager.Instance.isAbilityActive = false;
     }
 
     private void HandleClick()
@@ -121,6 +136,17 @@ public class TimeFreezeAbility : MonoBehaviour
                 Vector3 dir = (enemy.transform.position - Camera.main.transform.position).normalized;
 
                 enemy.TakeDamage(10f);
+
+                if (clickHitVFX != null)
+                {
+                    Instantiate(
+                        clickHitVFX,
+                        hit.point,
+                        Quaternion.LookRotation(hit.normal)
+                    );
+                }
+
+                SoundManager.Instance?.PlayFreezeClickHit();
 
                 Rigidbody rb = enemy.GetComponent<Rigidbody>();
 
