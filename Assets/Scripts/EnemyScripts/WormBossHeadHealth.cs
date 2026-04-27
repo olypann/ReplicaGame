@@ -2,37 +2,59 @@ using UnityEngine;
 
 public class WormBossHeadHealth : MonoBehaviour
 {
+    [Header("health")]
     [SerializeField] private float maxHealth = 500f;
 
     private float currentHealth;
 
-    private int unlockedSegments = 0;
+    [Header("progression")]
+    [SerializeField] private int totalSegments = 5;
 
-    private float segmentSize;
+    private int unlockedSegments = 0;
+    private float segmentHealthValue;
 
     private void Start()
     {
         currentHealth = maxHealth;
-        segmentSize = maxHealth * 0.2f;
+
+        segmentHealthValue = maxHealth / totalSegments;
+    }
+
+    // Called by boss when a body part dies
+    public void UnlockNextPhase()
+    {
+        if (unlockedSegments >= totalSegments)
+            return;
+
+        unlockedSegments++;
+
+        Debug.Log("[Head] Unlocked segment " + unlockedSegments + "/" + totalSegments);
     }
 
     public void TakeDamage(float dmg)
     {
-        float allowedDamage = unlockedSegments * segmentSize;
+        float maxAllowedDamage = unlockedSegments * segmentHealthValue;
 
-        float minHealth = maxHealth - allowedDamage;
+        float minHealthAllowed = maxHealth - maxAllowedDamage;
 
-        if (currentHealth <= minHealth)
+        // ❌ still locked
+        if (unlockedSegments <= 0)
         {
+            Debug.Log("[Head] Damage blocked (no segments unlocked)");
             return;
         }
 
-        currentHealth -= dmg;
+        // clamp damage so head cannot go below allowed threshold
+        float newHealth = currentHealth - dmg;
 
-        if (currentHealth < minHealth)
+        if (newHealth < minHealthAllowed)
         {
-            currentHealth = minHealth;
+            newHealth = minHealthAllowed;
         }
+
+        currentHealth = newHealth;
+
+        Debug.Log("[Head] HP: " + currentHealth + " / " + maxHealth);
 
         if (currentHealth <= 0f)
         {
@@ -40,18 +62,14 @@ public class WormBossHeadHealth : MonoBehaviour
         }
     }
 
-    public void UnlockNextPhase()
+    public float GetHealthPercent()
     {
-        if (unlockedSegments >= 5)
-        {
-            return;
-        }
-
-        unlockedSegments++;
+        return currentHealth / maxHealth;
     }
 
     private void Die()
     {
-        Debug.Log("boss head dead - fight over");
+        Debug.Log("Boss head defeated - fight over");
+        Destroy(gameObject);
     }
 }

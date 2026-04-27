@@ -1,249 +1,444 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 public class WormBossController : MonoBehaviour
 {
-    [Header("target")]
+    public enum BossState
+    {
+        Orbit_Fast,
+        Orbit_Calm,
+        Dive,
+        Split
+    }
+
+    [Header("Target")]
     [SerializeField] private Transform player;
 
-    [Header("body parts (0 = head, rest = body)")]
+    [Header("Body Parts (0 = head)")]
     [SerializeField] private List<Transform> parts = new List<Transform>();
 
-    [Header("orbit movement")]
-    [SerializeField] private float orbitRadius = 6f;
-    [SerializeField] private float orbitHeight = 3f;
-    [SerializeField] private float orbitSpeed = 1.5f;
+    [Header("Enemy Scripts on Parts")]
+    [SerializeField] private List<EnemyScript> partEnemies = new List<EnemyScript>();
 
-    [Header("movement")]
-    [SerializeField] private float followSpeed = 10f;
+    [Header("Orbit Settings")]
+    [SerializeField] private float fastRadius = 6f;
+    [SerializeField] private float calmRadius = 4f;
+
+    [SerializeField] private float fastHeight = 3f;
+    [SerializeField] private float calmHeight = 1.5f;
+
+    [SerializeField] private float fastSpeed = 2f;
+    [SerializeField] private float calmSpeed = 0.7f;
+
+    [Header("Movement")]
+    [SerializeField] private float headLerpSpeed = 6f;
+    [SerializeField] private float chainSpeed = 10f;
     [SerializeField] private float segmentDistance = 1.2f;
 
-    [Header("dive attack")]
+    [Header("Dive Attack")]
     [SerializeField] private float diveSpeed = 18f;
     [SerializeField] private float diveDuration = 1.2f;
+    [SerializeField] private float diveDamageRange = 2.5f;
+    [SerializeField] private float diveDamage = 20f;
 
-    [Header("split attack")]
+    [Header("Split Attack")]
     [SerializeField] private float splitDuration = 4f;
     [SerializeField] private float splitForce = 6f;
 
+    [Header("Ground Offset")]
+    [SerializeField] private float groundOffset = 1.5f;
+
+    [Header("State Timing")]
+    [SerializeField] private float minStateTime = 2f;
+    [SerializeField] private float maxStateTime = 4f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float calmChance = 0.4f;
+
+    // runtime
+    private BossState state;
+    private float stateTimer;
     private float orbitT;
-    private float attackTimer;
 
-    private bool isDiving;
     private bool isSplitting;
-
-    private bool isSplit;
+    private bool diveHit;
 
     private Vector3 diveTarget;
+    private Vector3[] splitVelocities;
 
-    private Coroutine attackRoutine;
+    [SerializeField] private float maxHeightAboveGround = 3f;
+    [SerializeField] private float heightClampSpeed = 10f;
 
     private void Start()
     {
-        orbitT = 0f;
-        attackTimer = Random.Range(2f, 4f);
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+        }
+
+
+        state = BossState.Orbit_Fast;
+        stateTimer = Random.Range(minStateTime, maxStateTime);
+
+        splitVelocities = new Vector3[Mathf.Max(1, parts.Count)];
+
+        SetBossControl(true);
+
+        Debug.Log("[Boss] START → ORBIT FAST");
     }
 
     private void Update()
     {
-        if (player == null)
-        {
+        CleanupDestroyedParts();
+
+        if (player == null || parts.Count == 0)
             return;
+
+        stateTimer -= Time.deltaTime;
+
+        switch (state)
+        {
+            case BossState.Orbit_Fast:
+            case BossState.Orbit_Calm:
+                Orbit();
+                HandleTransitions();
+                break;
+
+            case BossState.Dive:
+                Dive();
+                break;
+
+            case BossState.Split:
+                Split();
+                break;
         }
 
-        Orbit();              // ALWAYS running (no stopping ever)
-        UpdateChain();       // ALWAYS running
+        if (state != BossState.Split)
+            UpdateChain();
 
-        HandleAttackLoop();  // decides when attacks happen
+        CheckBossDeath();
     }
 
-    // =========================
-    // ORBIT (continuous motion)
-    // =========================
+    // ================= ORBIT =================
+
     private void Orbit()
     {
-        orbitT += Time.deltaTime * orbitSpeed;
+        bool calm = state == BossState.Orbit_Calm;
+
+        float speed = calm ? calmSpeed : fastSpeed;
+        float radius = calm ? calmRadius : fastRadius;
+        float height = calm ? calmHeight : fastHeight;
+
+        orbitT += Time.deltaTime * speed;
 
         Vector3 center = player.position;
+        center.y = GetGroundY(center);
 
         Vector3 offset = new Vector3(
             Mathf.Cos(orbitT),
             0f,
             Mathf.Sin(orbitT)
-        ) * orbitRadius;
+        ) * radius;
 
-        Vector3 targetPos = center + offset;
-        targetPos.y += orbitHeight;
+        Vector3 target = center + offset;
+        float groundY = GetGroundY(target);
 
-        MoveHead(targetPos);
+        // desired height above ground
+        float desiredY = groundY + height;
+
+        // clamp against runaway floating
+        float currentY = target.y;
+
+        // smooth correction instead of snapping
+        target.y = Mathf.Lerp(
+            currentY,
+            Mathf.Min(desiredY, groundY + maxHeightAboveGround),
+            Time.deltaTime * heightClampSpeed
+        );
+
+        MoveHead(target);
     }
 
-    private void MoveHead(Vector3 pos)
+    private void MoveHead(Vector3 target)
     {
-        pos = ApplyGroundClearance(pos);
-
         Transform head = parts[0];
 
         head.position = Vector3.Lerp(
             head.position,
-            pos,
-            Time.deltaTime * followSpeed
+            target,
+            Time.deltaTime * headLerpSpeed
         );
+
+        Vector3 pos = head.position;
+
+        float ground = GetGroundY(pos);
+        float maxY = ground + maxHeightAboveGround;
+
+        if (pos.y > maxY)
+        {
+            pos.y = Mathf.Lerp(pos.y, maxY, Time.deltaTime * 5f);
+        }
+
+        head.position = pos;
     }
 
-    // =========================
-    // ATTACK LOOP (non-blocking)
-    // =========================
-    private void HandleAttackLoop()
+    // ================= DIVE =================
+
+    private void StartDive()
     {
-        if (isDiving || isSplitting)
-        {
-            return; // attacks don’t stack
-        }
+        state = BossState.Dive;
+        stateTimer = diveDuration;
 
-        attackTimer -= Time.deltaTime;
+        diveTarget = player.position;
+        diveHit = false;
 
-        if (attackTimer > 0f)
-        {
-            return;
-        }
-
-        attackTimer = Random.Range(2f, 4f);
-
-        float roll = Random.value;
-
-        if (roll < 0.5f)
-        {
-            attackRoutine = StartCoroutine(DiveAttack());
-        }
-        else
-        {
-            attackRoutine = StartCoroutine(SplitAttack());
-        }
+        Debug.Log("[Boss] STATE → DIVE");
     }
 
-    // =========================
-    // DIVE ATTACK
-    // =========================
-    private IEnumerator DiveAttack()
+    private void Dive()
     {
-        isDiving = true;
-
         Transform head = parts[0];
 
-        Vector3 target = player.position + Vector3.down * 1f;
+        Vector3 target = diveTarget;
+        target.y = GetGroundY(target) + groundOffset;
 
-        float t = 0f;
+        head.position = Vector3.MoveTowards(
+            head.position,
+            target,
+            diveSpeed * Time.deltaTime
+        );
 
-        while (t < diveDuration)
+        if (!diveHit && Vector3.Distance(head.position, player.position) < diveDamageRange)
         {
-            t += Time.deltaTime;
+            PlayerStats stats = player.GetComponent<PlayerStats>();
 
-            Vector3 pos = Vector3.MoveTowards(
-                head.position,
-                target,
-                diveSpeed * Time.deltaTime
-            );
-
-            pos = ApplyGroundClearance(pos);
-
-            head.position = pos;
-
-            yield return null;
-        }
-
-        isDiving = false;
-    }
-
-    // =========================
-    // SPLIT ATTACK
-    // =========================
-    private IEnumerator SplitAttack()
-    {
-        isSplitting = true;
-        isSplit = true;
-
-        foreach (Transform p in parts)
-        {
-            Rigidbody rb = p.GetComponent<Rigidbody>();
-
-            if (rb != null)
+            if (stats != null)
             {
-                rb.AddForce(Random.insideUnitSphere * splitForce, ForceMode.Impulse);
+                stats.TakeDamage(diveDamage);
+                Debug.Log("[Boss] DIVE HIT PLAYER");
             }
+
+            diveHit = true;
         }
 
-        yield return new WaitForSeconds(splitDuration);
-
-        isSplit = false;
-        isSplitting = false;
+        if (stateTimer <= 0f)
+        {
+            SetOrbitFast();
+        }
     }
 
-    // =========================
-    // CHAIN FOLLOW
-    // =========================
-    private void UpdateChain()
-    {
-        if (isSplit)
-        {
-            return;
-        }
+    // ================= SPLIT =================
 
-        Transform prev = parts[0];
+    private void StartSplit()
+    {
+        state = BossState.Split;
+        stateTimer = splitDuration;
+        isSplitting = true;
+
+        SetBossControl(false); // 🔥 ENEMY AI ENABLED
+
+        Debug.Log("[Boss] STATE → SPLIT (ENEMY AI ENABLED)");
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            splitVelocities[i] = Random.insideUnitSphere * splitForce;
+        }
+    }
+
+    private void Split()
+    {
+        Transform head = parts[0];
+
+        Vector3 headTarget = player.position;
+        headTarget.y = GetGroundY(headTarget) + fastHeight;
+
+        head.position = Vector3.Lerp(
+            head.position,
+            headTarget,
+            Time.deltaTime * headLerpSpeed
+        );
 
         for (int i = 1; i < parts.Count; i++)
         {
             Transform part = parts[i];
 
+            Vector3 dir = (player.position - part.position).normalized;
+            Vector3 move = (dir + splitVelocities[i]).normalized;
+
+            part.position += move * (headLerpSpeed * 0.7f) * Time.deltaTime;
+
+            splitVelocities[i] = Vector3.Lerp(
+                splitVelocities[i],
+                Random.insideUnitSphere,
+                Time.deltaTime * 0.5f
+            );
+        }
+
+        if (stateTimer <= 0f)
+        {
+            isSplitting = false;
+            SetBossControl(true); // 🔥 RETURN CONTROL
+
+            SetOrbitFast();
+
+            Debug.Log("[Boss] SPLIT END → ORBIT FAST");
+        }
+    }
+
+    // ================= CHAIN =================
+
+    private void UpdateChain()
+    {
+        if (parts == null || parts.Count == 0)
+            return;
+
+        Transform prev = parts[0];
+
+        if (prev == null)
+            return;
+
+        for (int i = 1; i < parts.Count; i++)
+        {
+            Transform part = parts[i];
+
+            if (part == null || prev == null)
+                continue;
+
             Vector3 target = prev.position;
 
             Vector3 dir = (part.position - target).normalized;
 
-            Vector3 followPos = target + dir * segmentDistance;
+            Vector3 follow = target + dir * segmentDistance;
 
             part.position = Vector3.Lerp(
                 part.position,
-                followPos,
-                Time.deltaTime * followSpeed
+                follow,
+                Time.deltaTime * chainSpeed
             );
 
             prev = part;
         }
     }
 
-    // =========================
-    // GROUND STABILITY
-    // =========================
-    private Vector3 ApplyGroundClearance(Vector3 position)
+    // ================= TRANSITIONS =================
+
+    private void HandleTransitions()
+    {
+        if (stateTimer > 0f)
+            return;
+
+        stateTimer = Random.Range(minStateTime, maxStateTime);
+
+        float roll = Random.value;
+
+        if (roll < calmChance)
+        {
+            SetOrbitCalm();
+        }
+        else if (roll < 0.65f)
+        {
+            StartDive();
+        }
+        else
+        {
+            StartSplit();
+        }
+    }
+
+    private void SetOrbitFast()
+    {
+        state = BossState.Orbit_Fast;
+        Debug.Log("[Boss] STATE → ORBIT FAST");
+    }
+
+    private void SetOrbitCalm()
+    {
+        state = BossState.Orbit_Calm;
+        Debug.Log("[Boss] STATE → ORBIT CALM");
+    }
+
+    // ================= CONTROL =================
+
+    private void SetBossControl(bool value)
+    {
+        foreach (EnemyScript e in partEnemies)
+        {
+            if (e != null)
+                e.controlledByBoss = value;
+        }
+    }
+
+    // ================= GROUND =================
+
+    private float GetGroundY(Vector3 pos)
     {
         RaycastHit hit;
 
-        Vector3 origin = position + Vector3.up * 50f;
+        Vector3 origin = pos + Vector3.up * 50f;
 
         if (Physics.Raycast(origin, Vector3.down, out hit, 200f))
+            return hit.point.y;
+
+        return pos.y;
+    }
+
+    private void CleanupDestroyedParts()
+    {
+        for (int i = parts.Count - 1; i >= 0; i--)
         {
-            float targetHeight = hit.point.y + orbitHeight;
+            if (parts[i] == null)
+            {
+                parts.RemoveAt(i);
 
-            position.y = Mathf.Lerp(position.y, targetHeight, Time.deltaTime * 10f);
+                if (i < partEnemies.Count)
+                    partEnemies.RemoveAt(i);
+
+                Debug.Log("[Boss] Removed destroyed part safely");
+            }
         }
-
-        return position;
     }
 
 
-    public void DamagePart(int index, float dmg)
+    private void CheckBossDeath()
     {
-        if (index < 0 || index >= parts.Count)
+        bool anyAlive = false;
+
+        // head + body all must be null OR dead
+        for (int i = 0; i < parts.Count; i++)
         {
-            return;
+            if (parts[i] != null && parts[i].gameObject.activeInHierarchy)
+            {
+                anyAlive = true;
+                break;
+            }
         }
 
-        WormBossPartHealth hp = parts[index].GetComponent<WormBossPartHealth>();
-
-        if (hp != null)
+        if (!anyAlive)
         {
-            hp.TakeDamage(dmg);
+            Debug.Log("[Boss] ALL PARTS DEAD → DESTROY BOSS ROOT");
+
+            Destroy(gameObject);
         }
+    }
+
+    public void NotifyPartDeath(Transform part)
+    {
+        if (parts.Contains(part))
+        {
+            parts.Remove(part);
+        }
+
+        EnemyScript enemy = part.GetComponent<EnemyScript>();
+        if (enemy != null)
+        {
+            partEnemies.Remove(enemy);
+        }
+
+        Debug.Log("[Boss] Part removed: " + part.name);
     }
 }

@@ -9,6 +9,9 @@ public class EnemyScript : MonoBehaviour
 
     private PlayerStats playerStats;
 
+    [Header("Boss Control")]
+    public bool controlledByBoss = false;
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float stopDistance = 2f;
@@ -99,7 +102,8 @@ public class EnemyScript : MonoBehaviour
             return;
         }
 
-        
+        if (controlledByBoss)
+        return;
 
         cooldownTimer -= Time.deltaTime;
 
@@ -377,17 +381,18 @@ public class EnemyScript : MonoBehaviour
 
     private void Die()
     {
-        if (isDead)
-            return;
+        if (isDead) return;
 
         isDead = true;
 
         StopAllCoroutines();
-
-        // disable behaviour immediately
         enabled = false;
 
-        Debug.Log("Enemy died");
+        if (controlledByBoss)
+        {
+            gameObject.SetActive(false); // instead of Destroy
+            return;
+        }
 
         Destroy(gameObject, 0.05f);
     }
@@ -424,5 +429,10 @@ public class EnemyScript : MonoBehaviour
 
             yield return null;
         }
+    }
+
+    public void ForceStopMovement()
+    {
+        StopAllCoroutines();
     }
 }

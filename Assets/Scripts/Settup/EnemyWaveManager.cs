@@ -8,6 +8,8 @@ public class EnemyWaveManager : MonoBehaviour
     [Header("enemies")]
     [SerializeField] private GameObject normalEnemyPrefab;
     [SerializeField] private GameObject specialEnemyPrefab;
+    [Header("boss")]
+    [SerializeField] private GameObject bossEnemyPrefab;
 
     [Header("fx")]
     [SerializeField] private GameObject spawnParticlePrefab;
@@ -28,6 +30,17 @@ public class EnemyWaveManager : MonoBehaviour
     [Header("boss wave spawns")]
     [SerializeField] private Transform[] bossWaveNormalSpawns;
     [SerializeField] private Transform[] bossWaveSpecialSpawns;
+    [Header("boss wave 1 spawns")]
+    [SerializeField] private Transform[] wave1BossSpawns;
+
+    [Header("boss wave 2 spawns")]
+    [SerializeField] private Transform[] wave2BossSpawns;
+
+    [Header("boss wave 3 spawns")]
+    [SerializeField] private Transform[] wave3BossSpawns;
+
+    [Header("boss final wave spawns")]
+    [SerializeField] private Transform[] bossWaveBossSpawns;
 
     [Header("ui")]
     [SerializeField] private TextMeshProUGUI waveText;
@@ -119,7 +132,7 @@ public class EnemyWaveManager : MonoBehaviour
 
         yield return StartCoroutine(ShowWaveText("Wave 1"));
 
-        SpawnWave(wave1NormalSpawns, wave1SpecialSpawns);
+        SpawnWave(wave1NormalSpawns, wave1SpecialSpawns, wave1BossSpawns);
         yield return StartCoroutine(WaitForWaveClear());
 
         if (playerDied)
@@ -143,7 +156,7 @@ public class EnemyWaveManager : MonoBehaviour
 
         yield return StartCoroutine(ShowWaveText("Wave 2"));
 
-        SpawnWave(wave2NormalSpawns, wave2SpecialSpawns);
+        SpawnWave(wave2NormalSpawns, wave2SpecialSpawns, wave2BossSpawns);
         yield return StartCoroutine(WaitForWaveClear());
 
         if (playerDied)
@@ -166,7 +179,7 @@ public class EnemyWaveManager : MonoBehaviour
 
         yield return StartCoroutine(ShowWaveText("Wave 3"));
 
-        SpawnWave(wave3NormalSpawns, wave3SpecialSpawns);
+        SpawnWave(wave3NormalSpawns, wave3SpecialSpawns, wave3BossSpawns);
         yield return StartCoroutine(WaitForWaveClear());
 
         if (playerDied)
@@ -189,7 +202,7 @@ public class EnemyWaveManager : MonoBehaviour
 
         yield return StartCoroutine(ShowWaveText("Boss Battle"));
 
-        SpawnWave(bossWaveNormalSpawns, bossWaveSpecialSpawns);
+        SpawnWave(bossWaveNormalSpawns, bossWaveSpecialSpawns, bossWaveBossSpawns);
         yield return StartCoroutine(WaitForWaveClear());
 
         if (playerDied)
@@ -230,9 +243,8 @@ public class EnemyWaveManager : MonoBehaviour
         }
     }
 
-    private void SpawnWave(Transform[] normalSpawns, Transform[] specialSpawns)
+    private void SpawnWave(Transform[] normalSpawns, Transform[] specialSpawns, Transform[] bossSpawns = null)
     {
-
         for (int i = 0; i < normalSpawns.Length; i++)
         {
             if (normalSpawns[i] == null)
@@ -251,6 +263,19 @@ public class EnemyWaveManager : MonoBehaviour
             }
 
             SpawnEnemy(specialEnemyPrefab, specialSpawns[i]);
+        }
+
+        if (bossSpawns != null)
+        {
+            for (int i = 0; i < bossSpawns.Length; i++)
+            {
+                if (bossSpawns[i] == null)
+                {
+                    continue;
+                }
+
+                SpawnEnemy(bossEnemyPrefab, bossSpawns[i]);
+            }
         }
     }
 

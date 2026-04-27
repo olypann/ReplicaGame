@@ -18,6 +18,7 @@ public class PossessionAbility : MonoBehaviour
     private EnemyPossessionController currentPossessed;
 
     public bool IsPossessing => isPossessing;
+    private PlayerPossessedAI playerAI;
 
     private void Start()
     {
@@ -25,6 +26,8 @@ public class PossessionAbility : MonoBehaviour
         cam = Camera.main.GetComponent<ThirdPersonCamera>();
 
         movement = GetComponent<PlayerMovement>();
+
+        playerAI = GetComponent<PlayerPossessedAI>();
     }
 
     private void Update()
@@ -81,6 +84,12 @@ public class PossessionAbility : MonoBehaviour
 
         SwitchTarget();
 
+        if (playerAI != null)
+        {
+            playerAI.enabled = true;
+            playerAI.SetActive(true, transform);
+        }
+
         if (AbilityStateManager.Instance != null)
         {
             AbilityStateManager.Instance.isAbilityActive = true;
@@ -122,6 +131,12 @@ public class PossessionAbility : MonoBehaviour
         if (AbilityStateManager.Instance != null)
         {
             AbilityStateManager.Instance.isAbilityActive = false;
+        }
+        
+        if (playerAI != null)
+        {
+            playerAI.SetActive(false, null);
+            playerAI.enabled = false;
         }
     }
 

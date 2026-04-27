@@ -20,6 +20,8 @@ public class PlayerPossessedAI : MonoBehaviour
     {
         combat = GetComponent<PlayerCombat>();
         controller = GetComponent<CharacterController>();
+
+        enabled = false;
     }
 
     public void SetActive(bool state, Transform followTarget)
@@ -46,14 +48,34 @@ public class PlayerPossessedAI : MonoBehaviour
 
     private void HandleMovement()
     {
-        Vector3 dir = target.position - transform.position;
+        EnemyScript closest = FindClosestEnemy();
+
+        Vector3 moveTarget = target.position;
+
+        if (closest != null)
+        {
+            moveTarget = closest.transform.position;
+        }
+
+        Vector3 dir = moveTarget - transform.position;
         dir.y = 0f;
 
         float distance = dir.magnitude;
 
-        if (distance < followDistance)
+        if (closest != null)
         {
-            return;
+            if (distance <= attackRange * 0.9f)
+            {
+                FaceTarget(dir);
+                return;
+            }
+        }
+        else
+        {
+            if (distance < followDistance)
+            {
+                return;
+            }
         }
 
         Vector3 move = dir.normalized * moveSpeed;
@@ -63,10 +85,7 @@ public class PlayerPossessedAI : MonoBehaviour
             controller.Move(move * Time.deltaTime);
         }
 
-        if (move != Vector3.zero)
-        {
-            transform.rotation = Quaternion.LookRotation(move);
-        }
+        FaceTarget(move);
     }
 
     private void HandleAttack()
@@ -91,9 +110,20 @@ public class PlayerPossessedAI : MonoBehaviour
 
         if (dist <= attackRange)
         {
-            //combat.SendMessage("TryAttack", SendMessageOptions.DontRequireReceiver);
             combat.ForceAttack();
         }
+    }
+
+    private void FaceTarget(Vector3 dir)
+    {
+        if (dir == Vector3.zero)
+        {
+            return;
+        }
+
+        dir.y = 0f;
+
+        transform.rotation = Quaternion.LookRotation(dir);
     }
 
     private EnemyScript FindClosestEnemy()
@@ -105,6 +135,11 @@ public class PlayerPossessedAI : MonoBehaviour
 
         foreach (EnemyScript e in enemies)
         {
+            if (e == null)
+            {
+                continue;
+            }
+
             float d = Vector3.Distance(transform.position, e.transform.position);
 
             if (d < bestDist)

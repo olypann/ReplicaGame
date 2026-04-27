@@ -152,12 +152,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        PlayerPossessedAI ai = GetComponent<PlayerPossessedAI>();
         if (IsMovementLocked())
         {
-            speed = 0f;
-            verticalSpeed = 0f;
+            if (ai == null || !ai.enabled)
+            {
+                speed = 0f;
+                verticalSpeed = 0f;
 
-            controller.Move(Vector3.zero);
+                controller.Move(Vector3.zero);
+            }
+
             return;
         }
 

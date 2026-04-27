@@ -66,7 +66,16 @@ public class WormBossPartHealth : MonoBehaviour
     {
         isDead = true;
 
-        Destroy(gameObject, 0.05f);
+        WormBossController boss = GetComponentInParent<WormBossController>();
+
+        if (boss != null)
+        {
+            boss.NotifyPartDeath(transform);
+        }
+
+        gameObject.SetActive(false); // IMPORTANT: prevents revive visuals
+
+        Debug.Log("Part died: " + gameObject.name);
     }
 
     public bool IsDead()
