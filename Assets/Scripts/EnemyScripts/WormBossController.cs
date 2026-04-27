@@ -55,6 +55,9 @@ public class WormBossController : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float calmChance = 0.4f;
 
+    [SerializeField] private float lowestHeadHeight = 0.15f;
+    private int startingPartCount;
+
     // runtime
     private BossState state;
     private float stateTimer;
@@ -86,6 +89,8 @@ public class WormBossController : MonoBehaviour
         stateTimer = Random.Range(minStateTime, maxStateTime);
 
         splitVelocities = new Vector3[Mathf.Max(1, parts.Count)];
+
+        startingPartCount = parts.Count;
 
         SetBossControl(true);
 
@@ -126,6 +131,7 @@ public class WormBossController : MonoBehaviour
 
     // ================= ORBIT =================
 
+    // replace your Orbit() method with this
     private void Orbit()
     {
         bool calm = state == BossState.Orbit_Calm;
@@ -148,13 +154,25 @@ public class WormBossController : MonoBehaviour
         Vector3 target = center + offset;
         float groundY = GetGroundY(target);
 
-        // desired height above ground
-        float desiredY = groundY + height;
+        // how many body parts are dead (ignores head at index 0)
+        int totalBodyParts = Mathf.Max(0, startingPartCount - 1);
+        int aliveBodyParts = Mathf.Max(0, parts.Count - 1);
+        int deadBodyParts = totalBodyParts - aliveBodyParts;
 
-        // clamp against runaway floating
+        float lowerPercent = 0f;
+
+        if (totalBodyParts > 0)
+        {
+            lowerPercent = (float)deadBodyParts / totalBodyParts;
+        }
+
+        // lower more each kill
+        float loweredHeight = Mathf.Lerp(height, lowestHeadHeight, lowerPercent);
+
+        float desiredY = groundY + loweredHeight;
+
         float currentY = target.y;
 
-        // smooth correction instead of snapping
         target.y = Mathf.Lerp(
             currentY,
             Mathf.Min(desiredY, groundY + maxHeightAboveGround),

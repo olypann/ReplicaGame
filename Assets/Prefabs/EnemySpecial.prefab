@@ -403,6 +403,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraOnlyEnemy: 1
   player: {fileID: 0}
+  controlledByBoss: 0
   moveSpeed: 4
   stopDistance: 2
   rotationSpeed: 8
@@ -416,6 +417,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 0}
+  damageVFXPoint: {fileID: 0}
+  damageVFXLife: 1.5
 --- !u!114 &4425284350100676398
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -437,8 +441,8 @@ MonoBehaviour:
   screenDamageAmount: 1
   projectilePrefab: {fileID: 5051456281869838802, guid: bbbd895fe8e02ed4f84109251bc1ed0d, type: 3}
   shootPoint: {fileID: 7415365290538974585}
-  projectileSpeed: 37.9
-  attackType: 1
+  projectileSpeed: 41.3
+  attackType: 3
 --- !u!114 &2192857303715752534
 MonoBehaviour:
   m_ObjectHideFlags: 0

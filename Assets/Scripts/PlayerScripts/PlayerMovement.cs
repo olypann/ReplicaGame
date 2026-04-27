@@ -348,7 +348,12 @@ public class PlayerMovement : MonoBehaviour
         {
             if (Time.time - lastSTapTime <= doubleTapTime)
             {
-                TryDodge(-cameraObject.transform.forward);
+                //TryDodge(-cameraObject.transform.forward);
+                Vector3 forward = cameraObject.transform.forward;
+                forward.y = 0f;
+                forward.Normalize();
+
+                TryDodge(-forward);
             }
 
             lastSTapTime = Time.time;

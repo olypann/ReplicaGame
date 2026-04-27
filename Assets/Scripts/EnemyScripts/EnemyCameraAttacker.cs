@@ -7,6 +7,8 @@ public class EnemyCameraAttacker : MonoBehaviour
     [SerializeField] private Transform cameraTarget;
     private CameraEntity cameraEntity;
 
+    
+
     [SerializeField] private Transform player;
     [SerializeField] private float keepDistanceFromPlayer = 6f;
 
@@ -26,7 +28,8 @@ public class EnemyCameraAttacker : MonoBehaviour
     [SerializeField] private float projectileSpeed = 12f;
 
     [Header("debug attack select")]
-    [SerializeField] private int attackType = 1; // 0 rotate, 1 push,2 screen
+    [SerializeField] private int attackType = 3;
+     // 0 rotate, 1 push,2 screen
 
     private float cooldown;
 
@@ -96,6 +99,12 @@ public class EnemyCameraAttacker : MonoBehaviour
         {
             attackType = 1;
             Debug.Log("camera enemy attack: push");
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha7))
+        {
+            attackType = 3;
+            Debug.Log("camera enemy attack: push + screen damage");
         }
 
         cooldown -= Time.deltaTime;

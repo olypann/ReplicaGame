@@ -51,6 +51,10 @@ public class EnemyScript : MonoBehaviour
 
     private float healthVisual;
 
+    [SerializeField] private GameObject damageVFX;
+    [SerializeField] private Transform damageVFXPoint;
+    [SerializeField] private float damageVFXLife = 1.5f;
+
     private void Start()
     {
         currentHealth = maxHealth;
@@ -335,7 +339,10 @@ public class EnemyScript : MonoBehaviour
 
         currentHealth -= damage;
 
-        
+        if (damage > 0f)
+        {
+            PlayDamageVFX();
+        }
 
         StartCoroutine(Stagger());
         StartCoroutine(SquishEffect());
@@ -434,5 +441,28 @@ public class EnemyScript : MonoBehaviour
     public void ForceStopMovement()
     {
         StopAllCoroutines();
+    }
+
+    private void PlayDamageVFX()
+    {
+        if (damageVFX == null)
+        {
+            return;
+        }
+
+        Transform spawnPoint = transform;
+
+        if (damageVFXPoint != null)
+        {
+            spawnPoint = damageVFXPoint;
+        }
+
+        GameObject vfx = Instantiate(
+            damageVFX,
+            spawnPoint.position,
+            Quaternion.identity
+        );
+
+        Destroy(vfx, damageVFXLife);
     }
 }

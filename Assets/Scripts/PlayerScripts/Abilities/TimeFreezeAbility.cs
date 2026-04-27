@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 
+using TMPro;
+
 public class TimeFreezeAbility : MonoBehaviour
 {
     [Header("freeze settings")]
@@ -9,6 +11,9 @@ public class TimeFreezeAbility : MonoBehaviour
     [SerializeField] private float pushForce = 8f;
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private GameObject freezeUI;
+
+    [SerializeField] private TMP_Text abilityText;
+    [SerializeField] private TextMeshProUGUI timerText;
 
     [Header("fx")]
     [SerializeField] private GameObject clickHitVFX;
@@ -65,6 +70,11 @@ public class TimeFreezeAbility : MonoBehaviour
             AbilityStateManager.Instance.isFreezeAbilityActive = true;
         }
 
+        if (timerText != null)
+        {
+            timerText.text = Mathf.Ceil(timer).ToString();
+        }
+
         isActive = true;
         AbilityStateManager.Instance.isAbilityActive = true;
         AbilityStateManager.Instance.isFreezeAbilityActive = true;
@@ -75,6 +85,11 @@ public class TimeFreezeAbility : MonoBehaviour
             freezeUI.SetActive(true);
         }
 
+        if (abilityText != null)
+        {
+            abilityText.text = "Click Frozen Enemies";
+        }
+
         Time.timeScale = freezeTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
@@ -83,6 +98,12 @@ public class TimeFreezeAbility : MonoBehaviour
         while (timer > 0f)
         {
             timer -= Time.unscaledDeltaTime;
+
+            if (timerText != null)
+            {
+                timerText.text = Mathf.Ceil(timer).ToString();
+            }
+
             yield return null;
         }
 
@@ -100,6 +121,16 @@ public class TimeFreezeAbility : MonoBehaviour
         if (freezeUI != null)
         {
             freezeUI.SetActive(false);
+        }
+
+        if (abilityText != null)
+        {
+            abilityText.text = "";
+        }
+
+        if (timerText != null)
+        {
+            timerText.text = "";
         }
 
         Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(false);

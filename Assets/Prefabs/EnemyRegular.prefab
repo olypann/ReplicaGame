@@ -148,6 +148,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraOnlyEnemy: 0
   player: {fileID: 0}
+  controlledByBoss: 0
   moveSpeed: 4
   stopDistance: 2
   rotationSpeed: 8
@@ -161,6 +162,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 7009197259492694640, guid: 51a414f879f56824a966f1ca98a8087f, type: 3}
+  damageVFXPoint: {fileID: 6565299182696176169}
+  damageVFXLife: 1.5
 --- !u!114 &3741328826979470082
 MonoBehaviour:
   m_ObjectHideFlags: 0

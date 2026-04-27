@@ -1,11 +1,15 @@
 using System.Collections;
 using UnityEngine;
 
+using TMPro;
+
 public class FreezeClickAbility : MonoBehaviour
 {
     [Header("timing")]
     [SerializeField] private float duration = 6f;
     private float timer;
+
+    [SerializeField] private TMP_Text abilityText;
 
     [Header("combat")]
     [SerializeField] private float damage = 15f;
@@ -52,6 +56,11 @@ public class FreezeClickAbility : MonoBehaviour
             freezeUI.SetActive(true);
         }
 
+        if (abilityText != null)
+        {
+            abilityText.text = "Click Frozen Enemies";
+        }
+
         Camera.main?.GetComponent<ThirdPersonCamera>()?.AddScreenShake(0.6f, 8f, duration);
 
         while (timer > 0f)
@@ -69,7 +78,10 @@ public class FreezeClickAbility : MonoBehaviour
         Cursor.visible = false;
         Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
 
-        
+        if (abilityText != null)
+        {
+            abilityText.text = "";
+        }
 
         active = false;
 

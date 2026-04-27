@@ -1,11 +1,16 @@
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class PossessionAbility : MonoBehaviour
 {
     [Header("settings")]
     [SerializeField] private float maxChargeRequired = 100f;
     [SerializeField] private float possessionDuration = 15f;
+
+    [SerializeField] private TMP_Text abilityText;
+
+    [SerializeField] private TextMeshProUGUI timerText;
 
     private PlayerMovement movement;
 
@@ -84,6 +89,16 @@ public class PossessionAbility : MonoBehaviour
 
         SwitchTarget();
 
+        if (abilityText != null)
+        {
+            abilityText.text = "Press 'E' to Possess A Different Enemy";
+        }
+
+        if (timerText != null)
+        {
+            timerText.text = Mathf.Ceil(possessionTimer).ToString();
+        }
+
         if (playerAI != null)
         {
             playerAI.enabled = true;
@@ -105,10 +120,17 @@ public class PossessionAbility : MonoBehaviour
 
         possessionTimer -= Time.deltaTime;
 
+        if (timerText != null)
+        {
+            timerText.text = Mathf.Ceil(possessionTimer).ToString();
+        }
+
         if (possessionTimer <= 0f)
         {
             EndPossession();
         }
+
+
     }
 
     private void EndPossession()
@@ -128,6 +150,11 @@ public class PossessionAbility : MonoBehaviour
             cam.SnapToTargetInstant(transform);
         }
 
+        if (timerText != null)
+        {
+            timerText.text = "";
+        }
+
         if (AbilityStateManager.Instance != null)
         {
             AbilityStateManager.Instance.isAbilityActive = false;
@@ -137,6 +164,11 @@ public class PossessionAbility : MonoBehaviour
         {
             playerAI.SetActive(false, null);
             playerAI.enabled = false;
+        }
+
+        if (abilityText != null)
+        {
+            abilityText.text = "";
         }
     }
 

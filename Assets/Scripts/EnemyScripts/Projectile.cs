@@ -39,6 +39,11 @@ public class Projectile : MonoBehaviour
             {
                 cam.HitScreen(screenDamageAmount);
             }
+            else if (attackType == 3)
+            {
+                cam.HitScreen(screenDamageAmount);
+                cam.HitPush(direction);
+            }
 
             Destroy(gameObject);
         }

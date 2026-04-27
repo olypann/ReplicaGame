@@ -11,6 +11,7 @@ public class CameraThrowAbility : MonoBehaviour
     [SerializeField] private ThirdPersonCamera cam;
     [SerializeField] private PlayerCombat combat;
     [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private TextMeshProUGUI instructionText;
 
     [Header("Timer")]
     [SerializeField] private float abilityDuration = 10f;
@@ -78,6 +79,11 @@ public class CameraThrowAbility : MonoBehaviour
         if (timerText != null)
         {
             timerText.gameObject.SetActive(false);
+        }
+
+        if (instructionText != null)
+        {
+            instructionText.text = "";
         }
     }
 
@@ -150,6 +156,12 @@ public class CameraThrowAbility : MonoBehaviour
         if (timerText != null)
         {
             timerText.gameObject.SetActive(true);
+        }
+
+        if (instructionText != null)
+        {
+            instructionText.text = "Aim With Mouse and Press 'E' to Launch";
+            instructionText.gameObject.SetActive(true);
         }
 
         if (animator != null)
@@ -328,6 +340,11 @@ public class CameraThrowAbility : MonoBehaviour
         if (timerText != null)
         {
             timerText.gameObject.SetActive(false);
+        }
+
+        if (instructionText != null)
+        {
+            instructionText.text = "";
         }
     }
 
