@@ -81,6 +81,7 @@ MonoBehaviour:
   minStateTime: 2
   maxStateTime: 4
   calmChance: 0.107
+  lowestHeadHeight: 0.15
   maxHeightAboveGround: 1.93
   heightClampSpeed: 5.83
 --- !u!1 &1215221158972885809
@@ -255,7 +256,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 06a256db9e568be4d846b2d794e2f0f2, type: 2}
+  - {fileID: 2100000, guid: 9ebb1b8dc40d70d4c9a156ea504d796b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -369,6 +370,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 0}
+  damageVFXPoint: {fileID: 0}
+  damageVFXLife: 1.5
 --- !u!1 &1891725785743178053
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,6 +796,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 0}
+  damageVFXPoint: {fileID: 0}
+  damageVFXLife: 1.5
 --- !u!1 &3686623688337218772
 GameObject:
   m_ObjectHideFlags: 0
@@ -1317,6 +1324,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 0}
+  damageVFXPoint: {fileID: 0}
+  damageVFXLife: 1.5
 --- !u!1 &5647805597536304921
 GameObject:
   m_ObjectHideFlags: 0
@@ -1486,6 +1496,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 0}
+  damageVFXPoint: {fileID: 0}
+  damageVFXLife: 1.5
 --- !u!1 &5768919175204362497
 GameObject:
   m_ObjectHideFlags: 0
@@ -1807,6 +1820,9 @@ MonoBehaviour:
   patrolRadius: 6
   patrolChangeTime: 3
   uiSmoothSpeed: 8
+  damageVFX: {fileID: 0}
+  damageVFXPoint: {fileID: 0}
+  damageVFXLife: 1.5
 --- !u!1 &6481673161997705969
 GameObject:
   m_ObjectHideFlags: 0

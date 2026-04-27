@@ -179,21 +179,18 @@ public class CameraThrowAbility : MonoBehaviour
 
     private IEnumerator MoveToAnchor()
     {
-        float t = 0f;
-
-        Vector3 start = cam.transform.position;
-        Quaternion startRot = cam.transform.rotation;
+        Vector3 velocity = Vector3.zero;
 
         SoundManager.Instance?.PlayCameraGrab();
 
-        while (t < 1f)
+        while (Vector3.Distance(cam.transform.position, aimAnchor.position) > 0.01f)
         {
-            t += Time.deltaTime * 8f;
-
-            cam.transform.position = Vector3.Lerp(start, aimAnchor.position, t);
-            Vector3 lookPos = player.position + player.forward * 3f + Vector3.up * 1.4f;
-            Quaternion targetRot = Quaternion.LookRotation(lookPos - aimAnchor.position);
-            cam.transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+            cam.transform.position = Vector3.SmoothDamp(
+                cam.transform.position,
+                aimAnchor.position,
+                ref velocity,
+                0.08f // lower = snappier, higher = smoother
+            );
 
             yield return null;
         }
