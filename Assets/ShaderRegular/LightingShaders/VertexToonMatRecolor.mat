@@ -233,7 +233,7 @@ Material:
     - _Surface: 0
     - _Threshold: 0.722
     - _VertexSnapScale: 2.85
-    - _VertexSnapStrength: 0.857
+    - _VertexSnapStrength: 0.521
     - _WarpScale: -0.02
     - _WarpSpeed: 0.02
     - _WarpStrength: 1

@@ -31,6 +31,23 @@ public class WeaponScript : MonoBehaviour
             playerCombat.AddAbilityCharge(playerCombat.abilityGainPerHit);
 
             SoundManager.Instance?.PlayAttack1Hit();
+
+            return;
+        }
+
+        // boss handling (new)
+        WormBossPartHealth bossPart = other.GetComponentInParent<WormBossPartHealth>();
+
+        if (bossPart != null)
+        {
+            if (!hitEnemies.Contains(enemy))
+            {
+                bossPart.TakeDamage(playerCombat.GetCurrentDamage());
+
+                playerCombat.AddAbilityCharge(playerCombat.abilityGainPerHit);
+
+                SoundManager.Instance?.PlayAttack1Hit();
+            }
         }
     }
 

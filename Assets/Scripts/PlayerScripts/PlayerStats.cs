@@ -15,9 +15,13 @@ public class PlayerStats : MonoBehaviour
     private int animHit;
     private int animDie;
 
+    private Vector3 startPosition;
+
     private void Start()
     {
         currentHealth = maxHealth;
+
+        startPosition = transform.position;
 
         if (healthMeter != null)
         {
@@ -39,7 +43,7 @@ public class PlayerStats : MonoBehaviour
         {
             return;
         }
-        
+
         if (isDead)
         {
             return;
@@ -60,7 +64,7 @@ public class PlayerStats : MonoBehaviour
         DamagePopupManager.Instance.SpawnDamagePopup(
             damage,
             transform,
-            true, 
+            true,
             currentHealth <= 0f,
             false,
             false
@@ -93,7 +97,54 @@ public class PlayerStats : MonoBehaviour
         {
             animator.SetTrigger(animDie);
         }
-        
+
+        FindFirstObjectByType<EnemyWaveManager>()?.OnPlayerDied();
+    }
+
+    public void ResetPlayer()
+    {
+        isDead = false;
+        currentHealth = maxHealth;
+
+        if (healthMeter != null)
+        {
+            float normalized = currentHealth / maxHealth;
+            healthMeter.SetValue(normalized);
+        }
+
+        if (animator != null)
+        {
+            animator.Rebind();
+            animator.Update(0f);
+        }
+    }
+
+    public void Revive()
+    {
+        isDead = false;
+
+        currentHealth = maxHealth;
+
+        if (healthMeter != null)
+        {
+            float normalized = currentHealth / maxHealth;
+            healthMeter.SetValue(normalized);
+        }
+
+        Animator anim = GetComponentInChildren<Animator>();
+
+        if (anim != null)
+        {
+            anim.Rebind();
+            anim.Update(0f);
+        }
+
+        Debug.Log("player revived");
+    }
+
+    public void ResetPosition()
+    {
+        transform.position = startPosition;
     }
 
     public float GetHealth()

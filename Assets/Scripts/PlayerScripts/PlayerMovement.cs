@@ -167,12 +167,12 @@ public class PlayerMovement : MonoBehaviour
         Movement();
         HandleDodge();
 
-        if (cam != null)
-        {
-            Vector3 euler = transform.eulerAngles;
-            euler.y = cam.GetYaw();
-            transform.eulerAngles = euler;
-        }
+        // if (cam != null)
+        // {
+        //     Vector3 euler = transform.eulerAngles;
+        //     euler.y = cam.GetYaw();
+        //     transform.eulerAngles = euler;
+        // }
     }
 
     private void LateUpdate()

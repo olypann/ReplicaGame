@@ -152,8 +152,8 @@ MonoBehaviour:
   stopDistance: 2
   rotationSpeed: 8
   attackDamage: 10
-  attackCooldown: 5
-  attackLungeDistance: 0.25
+  attackCooldown: 4
+  attackLungeDistance: 1.22
   attackLungeTime: 0.12
   maxHealth: 100
   healthSlider: {fileID: 4421443601905245924}
@@ -174,9 +174,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 15
-  lungeForce: 10
+  lungeForce: 16.1
   attackCooldown: 0.6
-  attackDamage: 20
+  attackDamage: 30
   possessionDuration: 15
   possessionTimerText: {fileID: 0}
 --- !u!1 &3941010734675222354

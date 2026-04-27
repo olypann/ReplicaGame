@@ -407,7 +407,7 @@ MonoBehaviour:
   stopDistance: 2
   rotationSpeed: 8
   attackDamage: 10
-  attackCooldown: 5
+  attackCooldown: 4
   attackLungeDistance: 0.25
   attackLungeTime: 0.12
   maxHealth: 100
@@ -437,7 +437,7 @@ MonoBehaviour:
   screenDamageAmount: 1
   projectilePrefab: {fileID: 5051456281869838802, guid: bbbd895fe8e02ed4f84109251bc1ed0d, type: 3}
   shootPoint: {fileID: 7415365290538974585}
-  projectileSpeed: 25.5
+  projectileSpeed: 37.9
   attackType: 1
 --- !u!114 &2192857303715752534
 MonoBehaviour:
@@ -452,8 +452,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 15
-  lungeForce: 10
+  lungeForce: 16
   attackCooldown: 0.6
-  attackDamage: 20
+  attackDamage: 30
   possessionDuration: 15
   possessionTimerText: {fileID: 0}

@@ -32,9 +32,21 @@ public class EnemyCameraAttacker : MonoBehaviour
 
     private void Start()
     {
-        if (cameraTarget != null)
+        
+        // if (cameraTarget != null)
+        // {
+        //     cameraEntity = cameraTarget.GetComponent<CameraEntity>();
+        // }
+
+        if (cameraTarget == null)
         {
-            cameraEntity = cameraTarget.GetComponent<CameraEntity>();
+            CameraEntity camEntity = FindFirstObjectByType<CameraEntity>();
+
+            if (camEntity != null)
+            {
+                cameraTarget = camEntity.transform;
+                cameraEntity = camEntity;
+            }
         }
 
         if (player == null)
