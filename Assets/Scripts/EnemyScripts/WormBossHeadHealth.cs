@@ -33,11 +33,19 @@ public class WormBossHeadHealth : MonoBehaviour
 
     public void TakeDamage(float dmg)
     {
+
+        WormBossController boss = GetComponentInParent<WormBossController>();
+
+        if (boss != null)
+        {
+            boss.NotifyBossHit();
+        }
+        
         float maxAllowedDamage = unlockedSegments * segmentHealthValue;
 
         float minHealthAllowed = maxHealth - maxAllowedDamage;
 
-        // ❌ still locked
+        
         if (unlockedSegments <= 0)
         {
             Debug.Log("[Head] Damage blocked (no segments unlocked)");

@@ -48,6 +48,8 @@ public class CameraThrowAbility : MonoBehaviour
     [SerializeField] private Animator animator;
     [SerializeField] private string removeWeaponAnim = "WeaponRemove";
 
+    [SerializeField] private float maxThrowDistance = 25f;
+
     private Vector3 returnTargetPosition;
 
     private bool active;
@@ -231,9 +233,14 @@ public class CameraThrowAbility : MonoBehaviour
         float t = 0f;
         float speed = 0f;
 
-        while (t < throwDuration || !hitSomething)
+        while (t < throwDuration)
         {
             t += Time.deltaTime;
+
+            if (Vector3.Distance(cam.transform.position, player.position) > 60f)
+            {
+                break;
+            }
 
             speed += throwAcceleration * Time.deltaTime;
             speed = Mathf.Clamp(speed, 0f, throwSpeed);
@@ -264,6 +271,9 @@ public class CameraThrowAbility : MonoBehaviour
             cam.AddThrowCameraImpulse(-cam.transform.forward * missShake);
             yield return new WaitForSeconds(lingerTime);
         }
+
+        thrown = true;
+        aiming = false;
 
         yield return ReturnCamera();
     }
@@ -354,7 +364,7 @@ public class CameraThrowAbility : MonoBehaviour
             timerText.text = Mathf.Ceil(timer).ToString();
         }
 
-        if (timer <= 0f && !returning)
+        if (timer <= 0f && !returning && !thrown)
         {
             StartCoroutine(ReturnCamera());
         }

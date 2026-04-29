@@ -49,6 +49,13 @@ public class WormBossPartHealth : MonoBehaviour
 
     public void TakeDamage(float dmg)
     {
+        WormBossController boss = GetComponentInParent<WormBossController>();
+
+        if (boss != null)
+        {
+            boss.NotifyBossHit();
+        }
+        
         if (isDead)
         {
             return;

@@ -72,6 +72,12 @@ public class WormBossController : MonoBehaviour
     [SerializeField] private float maxHeightAboveGround = 3f;
     [SerializeField] private float heightClampSpeed = 10f;
 
+    [Header("boss reset")]
+    [SerializeField] private float noHitResetTime = 15f;
+    [SerializeField] private Vector3 resetPosition = new Vector3(-0.18f, 2f, 0.02f);
+
+    private float lastHitTime;
+
     private void Start()
     {
         if (player == null)
@@ -84,6 +90,7 @@ public class WormBossController : MonoBehaviour
             }
         }
 
+        lastHitTime = Time.time;
 
         state = BossState.Orbit_Fast;
         stateTimer = Random.Range(minStateTime, maxStateTime);
@@ -105,6 +112,11 @@ public class WormBossController : MonoBehaviour
             return;
 
         stateTimer -= Time.deltaTime;
+
+        if (Time.time - lastHitTime >= noHitResetTime)
+        {
+            ForceReturnToCenter();
+        }
 
         switch (state)
         {
@@ -138,12 +150,14 @@ public class WormBossController : MonoBehaviour
 
         float speed = calm ? calmSpeed : fastSpeed;
         float radius = calm ? calmRadius : fastRadius;
-        float height = calm ? calmHeight : fastHeight;
 
         orbitT += Time.deltaTime * speed;
 
+        // IMPORTANT: use player XZ only, NEVER player Y (jumping was lifting boss)
         Vector3 center = player.position;
-        center.y = GetGroundY(center);
+        float playerGround = GetGroundY(player.position);
+
+        center.y = playerGround;
 
         Vector3 offset = new Vector3(
             Mathf.Cos(orbitT),
@@ -152,32 +166,41 @@ public class WormBossController : MonoBehaviour
         ) * radius;
 
         Vector3 target = center + offset;
+
         float groundY = GetGroundY(target);
 
-        // how many body parts are dead (ignores head at index 0)
+        // body count excluding head
         int totalBodyParts = Mathf.Max(0, startingPartCount - 1);
         int aliveBodyParts = Mathf.Max(0, parts.Count - 1);
-        int deadBodyParts = totalBodyParts - aliveBodyParts;
+        bool headOnly = aliveBodyParts <= 0;
 
-        float lowerPercent = 0f;
+        float desiredHeight;
+        float bob;
 
-        if (totalBodyParts > 0)
+        if (headOnly)
         {
-            lowerPercent = (float)deadBodyParts / totalBodyParts;
+            // GUARANTEED low head phase
+            desiredHeight = 0.08f;
+            bob = Mathf.Sin(orbitT * 4f) * 0.05f;
+        }
+        else if (calm)
+        {
+            desiredHeight = 0.45f;
+            bob = Mathf.Sin(orbitT * 3f) * 0.28f;
+        }
+        else
+        {
+            desiredHeight = 0.9f;
+            bob = Mathf.Sin(orbitT * 2.5f) * 0.45f;
         }
 
-        // lower more each kill
-        float loweredHeight = Mathf.Lerp(height, lowestHeadHeight, lowerPercent);
+        target.y = groundY + desiredHeight + bob;
 
-        float desiredY = groundY + loweredHeight;
-
-        float currentY = target.y;
-
-        target.y = Mathf.Lerp(
-            currentY,
-            Mathf.Min(desiredY, groundY + maxHeightAboveGround),
-            Time.deltaTime * heightClampSpeed
-        );
+        // hard clamp near ground
+        if (headOnly)
+            target.y = Mathf.Clamp(target.y, groundY + 0.02f, groundY + 0.22f);
+        else
+            target.y = Mathf.Clamp(target.y, groundY + 0.03f, groundY + 1.2f);
 
         MoveHead(target);
     }
@@ -458,5 +481,28 @@ public class WormBossController : MonoBehaviour
         }
 
         Debug.Log("[Boss] Part removed: " + part.name);
+    }
+
+    private void ForceReturnToCenter()
+    {
+        Transform head = parts[0];
+
+        if (head == null)
+        {
+            return;
+        }
+
+        head.position = Vector3.Lerp(
+            head.position,
+            resetPosition,
+            Time.deltaTime * headLerpSpeed
+        );
+
+        UpdateChain();
+    }
+
+    public void NotifyBossHit()
+    {
+        lastHitTime = Time.time;
     }
 }

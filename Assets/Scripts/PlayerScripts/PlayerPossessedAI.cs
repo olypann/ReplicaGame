@@ -14,7 +14,7 @@ public class PlayerPossessedAI : MonoBehaviour
 
     private float attackTimer;
 
-    private bool isActive;
+    public bool isActive;
 
     private void Start()
     {

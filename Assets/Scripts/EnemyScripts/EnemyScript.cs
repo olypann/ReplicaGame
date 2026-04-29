@@ -49,11 +49,15 @@ public class EnemyScript : MonoBehaviour
 
     [SerializeField] private float uiSmoothSpeed = 8f;
 
+    private Coroutine squishRoutine;
+
     private float healthVisual;
 
     [SerializeField] private GameObject damageVFX;
     [SerializeField] private Transform damageVFXPoint;
     [SerializeField] private float damageVFXLife = 1.5f;
+
+    private float lastSquishTime;
 
     private void Start()
     {
@@ -295,6 +299,7 @@ public class EnemyScript : MonoBehaviour
 
         float t = 0f;
 
+        // quick jump forward
         while (t < attackLungeTime)
         {
             t += Time.deltaTime;
@@ -312,18 +317,35 @@ public class EnemyScript : MonoBehaviour
         transform.position = targetPos;
 
         PlayerCombat combat = playerStats.GetComponent<PlayerCombat>();
-        if (combat != null && combat.IsInvulnerable())
+
+        if (combat == null || !combat.IsInvulnerable())
         {
-            isAttacking = false;
-            yield break;
+            if (playerStats != null)
+            {
+                playerStats.TakeDamage(attackDamage);
+            }
+
+            Debug.Log("Enemy attacked player for " + attackDamage);
         }
 
-        if (playerStats != null)
+        // snap back fast after bite
+        t = 0f;
+
+        while (t < attackLungeTime * 0.65f)
         {
-            playerStats.TakeDamage(attackDamage);
+            t += Time.deltaTime;
+
+            float progress = t / (attackLungeTime * 0.65f);
+
+            float height = Mathf.Sin(progress * Mathf.PI) * 0.15f;
+
+            transform.position = Vector3.Lerp(targetPos, startPos, progress);
+            transform.position += Vector3.up * height;
+
+            yield return null;
         }
 
-        Debug.Log("Enemy attacked player for " + attackDamage);
+        transform.position = startPos;
 
         isAttacking = false;
     }
@@ -345,7 +367,13 @@ public class EnemyScript : MonoBehaviour
         }
 
         StartCoroutine(Stagger());
-        StartCoroutine(SquishEffect());
+
+        if (squishRoutine != null)
+        {
+            StopCoroutine(squishRoutine);
+        }
+
+        squishRoutine = StartCoroutine(SquishEffect());
 
         Debug.Log("Enemy took " + damage + " damage. HP: " + currentHealth);
 
@@ -375,15 +403,36 @@ public class EnemyScript : MonoBehaviour
 
     private IEnumerator SquishEffect()
     {
+        lastSquishTime = Time.unscaledTime;
+
         Vector3 originalScale = transform.localScale;
 
-        Vector3 squish = new Vector3(originalScale.x * 1.15f, originalScale.y * 0.75f, originalScale.z * 1.15f);
+        Vector3 squish = new Vector3(
+            originalScale.x * 1.15f,
+            originalScale.y * 0.75f,
+            originalScale.z * 1.15f
+        );
+
+        Vector3 stretch = new Vector3(
+            originalScale.x * 0.9f,
+            originalScale.y * 1.12f,
+            originalScale.z * 0.9f
+        );
 
         transform.localScale = squish;
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSecondsRealtime(0.08f);
+
+        if (Time.unscaledTime - lastSquishTime > 0.06f)
+        {
+            transform.localScale = stretch;
+
+            yield return new WaitForSecondsRealtime(0.08f);
+        }
 
         transform.localScale = originalScale;
+
+        squishRoutine = null;
     }
 
     private void Die()

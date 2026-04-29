@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-
 using UnityEngine.UI;
 
 public class PlayerCombat : MonoBehaviour
@@ -17,7 +16,6 @@ public class PlayerCombat : MonoBehaviour
     private float staminaVisual;
     private float abilityVisual;
 
-
     [SerializeField] private float lightAttackCost = 10f;
 
     public float currentStamina;
@@ -25,7 +23,6 @@ public class PlayerCombat : MonoBehaviour
     [Header("Ability Charge")]
     [SerializeField] private float maxAbilityCharge = 100f;
     [SerializeField] public float abilityGainPerHit = 10f;
-    
 
     public float currentAbilityCharge;
 
@@ -60,6 +57,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private float attack3VFXTime = 0.25f;
     [SerializeField] private float airAttackVFXTime = 0f;
     [SerializeField] private float chargedAttackVFXTime = 0.2f;
+
+    private float nextAttackAnimTime;
 
     private GameObject currentVFX;
 
@@ -97,39 +96,25 @@ public class PlayerCombat : MonoBehaviour
     private int animAttack1;
     private int animAttack2;
     private int animAttack3;
-    private int animCharge; //
+    private int animCharge;
 
     private int animChargeStart;
     private int animChargeRelease;
-    
+
     private int animAirAttack;
 
     private WeaponScript weaponHitbox;
     private CharacterController controller;
 
-    // [Header("possession ability")]
-    // [SerializeField] private float possessionDuration = 15f;
-
-    // private bool isPossessing;
-    // private float possessionTimer;
-
-    // public EnemyPossessionController currentPossessed;
-    // private PlayerPossessedAI possessedAI;
-    // public bool isPossessed;
-
     private ThirdPersonCamera cam;
 
-    // private bool isTargetingAbilityActive;
-    // [Header("Ability 1 - Possession Mode")]
-    // private bool ability1Active;
-    // private float ability1Timer;
-    // [SerializeField] private float ability1Duration = 15f;
+    private PlayerPossessedAI playerAI;
 
     private void Start()
     {
+        playerAI = GetComponent<PlayerPossessedAI>();
         cam = Camera.main.GetComponent<ThirdPersonCamera>();
-        //setup references and starting values
-        //possessedAI = GetComponent<PlayerPossessedAI>();
+
         currentStamina = maxStamina;
         currentAbilityCharge = 0f;
 
@@ -139,7 +124,7 @@ public class PlayerCombat : MonoBehaviour
         animAttack1 = Animator.StringToHash("Attack1");
         animAttack2 = Animator.StringToHash("Attack2");
         animAttack3 = Animator.StringToHash("Attack3");
-        animCharge = Animator.StringToHash("ChargeAttack"); //
+        animCharge = Animator.StringToHash("ChargeAttack");
         animAirAttack = Animator.StringToHash("AirAttack");
 
         animChargeStart = Animator.StringToHash("ChargeStart");
@@ -151,65 +136,44 @@ public class PlayerCombat : MonoBehaviour
         abilityVisual = currentAbilityCharge / maxAbilityCharge;
 
         if (staminaSlider != null)
-        {
             staminaSlider.SetValue(staminaVisual);
-        }
 
         if (abilitySlider != null)
-        {
             abilitySlider.SetValue(abilityVisual);
-        }
 
         if (chargeReadyObject != null)
-        {
             chargeReadyObject.SetActive(false);
-        }
 
         if (chargeFullObject != null)
-        {
             chargeFullObject.SetActive(false);
-        }
     }
 
     private void Update()
     {
-    
-        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isCameraThrowActive)
+        if (AbilityStateManager.Instance != null &&
+            AbilityStateManager.Instance.isCameraThrowActive)
         {
-            
             return;
         }
-        
-        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+
+        if (AbilityStateManager.Instance != null &&
+            AbilityStateManager.Instance.isFreezeAbilityActive)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             return;
         }
 
-        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        if (AbilityStateManager.Instance != null &&
+            AbilityStateManager.Instance.isFreezeAbilityActive)
         {
             return;
         }
-        // if (isPossessed)
-        // {
-        //     HandlePossessedAI();
-        //     return;
-        // }
-        // main update loop
+
         HandleStamina();
-        
         HandleComboTimer();
         HandleAttackInput();
         HandleCharge();
-
-        // HandlePossessionAbility();
-        // HandleAbility1();
-
-        // if (Input.GetKeyDown(KeyCode.E))
-        // {
-        //     UseAbility();
-        // }
 
         UpdateUI();
     }
@@ -219,23 +183,27 @@ public class PlayerCombat : MonoBehaviour
         float staminaTarget = currentStamina / maxStamina;
         float abilityTarget = currentAbilityCharge / maxAbilityCharge;
 
-        staminaVisual = Mathf.Lerp(staminaVisual, staminaTarget, Time.deltaTime * uiSmoothSpeed);
-        abilityVisual = Mathf.Lerp(abilityVisual, abilityTarget, Time.deltaTime * uiSmoothSpeed);
+        staminaVisual = Mathf.Lerp(
+            staminaVisual,
+            staminaTarget,
+            Time.deltaTime * uiSmoothSpeed
+        );
+
+        abilityVisual = Mathf.Lerp(
+            abilityVisual,
+            abilityTarget,
+            Time.deltaTime * uiSmoothSpeed
+        );
 
         if (staminaSlider != null)
-        {
             staminaSlider.SetValue(staminaVisual);
-        }
 
         if (abilitySlider != null)
-        {
             abilitySlider.SetValue(abilityVisual);
-        }
     }
 
     private void HandleStamina()
     {
-        // regenerate stamina over time
         if (currentStamina < maxStamina)
         {
             currentStamina += staminaRegenRate * Time.deltaTime;
@@ -246,7 +214,6 @@ public class PlayerCombat : MonoBehaviour
 
     private void HandleComboTimer()
     {
-        // reset combo if timer runs out
         if (comboStep == 1 || comboStep == 2)
         {
             comboTimer -= Time.deltaTime;
@@ -260,36 +227,41 @@ public class PlayerCombat : MonoBehaviour
 
     private void HandleAttackInput()
     {
+
+        if (playerAI != null && playerAI.isActive)
+            return;
+
         bool isGrounded = controller.isGrounded;
 
-        // left click pressed
         if (Input.GetMouseButtonDown(0))
         {
-            // air attack case
+            if (Time.time < nextAttackAnimTime)
+            {
+                return;
+            }
+
             if (!isGrounded)
             {
                 StartCoroutine(DoAirAttack());
                 return;
             }
 
-            // reset charge state
             chargeTimer = 0f;
             chargeStarted = false;
             isCharging = true;
 
-            //queue combo if currently attacking
             if (isAttacking)
             {
                 if (canCombo)
                 {
                     attackQueued = true;
+                    nextAttackAnimTime = Time.time + 0.12f;
                 }
 
                 return;
             }
         }
 
-        // left click released
         if (Input.GetMouseButtonUp(0))
         {
             if (!isGrounded)
@@ -297,7 +269,6 @@ public class PlayerCombat : MonoBehaviour
                 return;
             }
 
-            // charged attack or normal attack
             if (chargeStarted && chargeTimer >= chargeTime)
             {
                 animator.SetTrigger(animChargeRelease);
@@ -315,7 +286,6 @@ public class PlayerCombat : MonoBehaviour
 
     private void HandleCharge()
     {
-        // handle charge buildup
         if (!isCharging)
         {
             return;
@@ -323,7 +293,6 @@ public class PlayerCombat : MonoBehaviour
 
         chargeTimer += Time.deltaTime;
 
-        // start charge effect
         if (!chargeStarted && chargeTimer >= chargeHoldThreshold)
         {
             chargeStarted = true;
@@ -332,8 +301,6 @@ public class PlayerCombat : MonoBehaviour
             if (chargeReadyObject != null)
             {
                 chargeReadyObject.SetActive(true);
-
-                //SoundManager.Instance?.PlayChargeReady();
                 SoundManager.Instance?.PlayChargeLoop(true);
             }
 
@@ -343,13 +310,12 @@ public class PlayerCombat : MonoBehaviour
             }
 
             Camera.main.GetComponent<ThirdPersonCamera>()?.SetChargeZoom(true);
-            
         }
 
-        // full charge effect
         if (chargeStarted && chargeTimer >= chargeTime)
         {
-            if (chargeFullObject != null && !chargeFullObject.activeSelf)
+            if (chargeFullObject != null &&
+                !chargeFullObject.activeSelf)
             {
                 chargeFullObject.SetActive(true);
             }
@@ -377,12 +343,10 @@ public class PlayerCombat : MonoBehaviour
         }
 
         Camera.main.GetComponent<ThirdPersonCamera>()?.SetChargeZoom(false);
-
     }
 
     private void TryAttack()
     {
-        // stamina check
         if (currentStamina < lightAttackCost)
         {
             return;
@@ -390,7 +354,6 @@ public class PlayerCombat : MonoBehaviour
 
         currentStamina -= lightAttackCost;
 
-        // increase combo step
         comboStep++;
 
         if (comboStep > 3)
@@ -398,7 +361,6 @@ public class PlayerCombat : MonoBehaviour
             comboStep = 1;
         }
 
-        //  combo timers
         if (comboStep == 1)
         {
             comboTimer = combo1ResetTime;
@@ -434,13 +396,11 @@ public class PlayerCombat : MonoBehaviour
     private IEnumerator PlayVFXDelayed(GameObject vfx, float delay)
     {
         yield return new WaitForSeconds(delay);
-
         PlayAttackVFX(vfx);
     }
 
     private IEnumerator DoAttack(int step)
     {
-        // starting attack state
         isAttacking = true;
         attackQueued = false;
         canCombo = false;
@@ -460,14 +420,16 @@ public class PlayerCombat : MonoBehaviour
         animator.ResetTrigger(animAttack2);
         animator.ResetTrigger(animAttack3);
 
-        // attack type
         if (step == 1)
         {
             animator.SetTrigger(animAttack1);
             currentAttackDamage = attack1Damage;
             attackDuration = 0.35f;
 
-            StartCoroutine(PlayVFXDelayed(attack1VFX, attack1VFXTime));
+            StartCoroutine(PlayVFXDelayed(
+                attack1VFX,
+                attack1VFXTime
+            ));
 
             SoundManager.Instance?.PlayAttack1Swing();
         }
@@ -477,7 +439,10 @@ public class PlayerCombat : MonoBehaviour
             currentAttackDamage = attack2Damage;
             attackDuration = 0.45f;
 
-            StartCoroutine(PlayVFXDelayed(attack2VFX, attack2VFXTime));
+            StartCoroutine(PlayVFXDelayed(
+                attack2VFX,
+                attack2VFXTime
+            ));
 
             SoundManager.Instance?.PlayAttack2Swing();
         }
@@ -488,7 +453,10 @@ public class PlayerCombat : MonoBehaviour
             attackDuration = attack3Duration;
             isInvulnerable = true;
 
-            StartCoroutine(PlayVFXDelayed(attack3VFX, attack3VFXTime));
+            StartCoroutine(PlayVFXDelayed(
+                attack3VFX,
+                attack3VFXTime
+            ));
 
             SoundManager.Instance?.PlayAttack3Swing();
         }
@@ -501,7 +469,6 @@ public class PlayerCombat : MonoBehaviour
         isAttacking = false;
         isInvulnerable = false;
 
-        //queued combo
         if (attackQueued)
         {
             attackQueued = false;
@@ -511,7 +478,6 @@ public class PlayerCombat : MonoBehaviour
 
     private IEnumerator DoChargedAttack()
     {
-        // charged attack state
         isAttacking = true;
         isInvulnerable = true;
 
@@ -527,45 +493,55 @@ public class PlayerCombat : MonoBehaviour
 
         Camera.main.GetComponent<ThirdPersonCamera>()?.TriggerChargeKick();
 
-        StartCoroutine(PlayVFXDelayed(chargedAttackVFX, chargedAttackVFXTime));
+        StartCoroutine(PlayVFXDelayed(
+            chargedAttackVFX,
+            chargedAttackVFXTime
+        ));
+
         StartCoroutine(StopChargeLoopDelayed());
 
         yield return new WaitForSeconds(0.8f);
 
         isAttacking = false;
         isInvulnerable = false;
-        
     }
 
     private IEnumerator StopChargeLoopDelayed()
     {
         yield return new WaitForSeconds(chargeLoopStopTime);
-
         StopChargeVFX();
     }
 
     private IEnumerator DoAirAttack()
     {
-        // air attack start
         isAttacking = true;
         isInvulnerable = true;
         didAirAttack = true;
 
         animator.SetTrigger(animAirAttack);
 
-        // push player downward while in air
         while (!controller.isGrounded)
         {
-            controller.Move(Vector3.down * airAttackForce * Time.deltaTime);
+            controller.Move(
+                Vector3.down *
+                airAttackForce *
+                Time.deltaTime
+            );
+
             yield return null;
         }
 
         SoundManager.Instance?.PlayAirLand();
 
-        StartCoroutine(PlayVFXDelayed(airAttackVFX, airAttackVFXTime));
+        StartCoroutine(PlayVFXDelayed(
+            airAttackVFX,
+            airAttackVFXTime
+        ));
 
-        // apply damage on landing
-        Collider[] hits = Physics.OverlapSphere(transform.position, airAttackRadius);
+        Collider[] hits = Physics.OverlapSphere(
+            transform.position,
+            airAttackRadius
+        );
 
         foreach (Collider hit in hits)
         {
@@ -574,7 +550,6 @@ public class PlayerCombat : MonoBehaviour
             if (enemy != null)
             {
                 enemy.TakeDamage(airAttackDamage);
-
                 AddAbilityCharge(abilityGainPerHit);
             }
         }
@@ -588,7 +563,6 @@ public class PlayerCombat : MonoBehaviour
     private void UseAbility()
     {
         currentAbilityCharge = 0f;
-
         SoundManager.Instance?.PlayAbilityUse();
     }
 
@@ -647,140 +621,6 @@ public class PlayerCombat : MonoBehaviour
         currentAbilityCharge = 0f;
     }
 
-    // private void HandlePossessionAbility()
-    // {
-    //     if (Input.GetKeyDown(KeyCode.Alpha1))
-    //     {
-    //         if (ability1Active || isPossessing)
-    //             return;
-
-    //         if (currentAbilityCharge < maxAbilityCharge)
-    //             return;
-
-    //         currentAbilityCharge = 0f;
-
-    //         StartAbility1(); 
-    //     }
-
-    //     if (!isPossessing)
-    //     {
-    //         return;
-    //     }
-
-    //     if (Input.GetKeyDown(KeyCode.E))
-    //     {
-    //         SwitchPossessionTarget();
-    //     }
-
-    //     possessionTimer -= Time.deltaTime;
-
-    //     if (possessionTimer <= 0f)
-    //     {
-    //         EndPossession();
-    //     }
-    // }
-    // private void StartPossession()
-    // {
-    //     isPossessing = true;
-    //     possessionTimer = possessionDuration;
-
-    //     SwitchPossessionTarget();
-    // }
-
-    // private void EndPossession()
-    // {
-    //     Cursor.lockState = CursorLockMode.Locked;
-    //     Cursor.visible = false;
-    //     isPossessing = false;
-
-    //     if (currentPossessed != null)
-    //     {
-    //         currentPossessed.SetPossessed(false, null);
-    //         currentPossessed = null;
-    //     }
-
-    //     if (cam != null)
-    //     {
-    //         cam.SetTarget(transform);
-    //     }
-    // }
-
-    // private void SwitchPossessionTarget()
-    // {
-    //     EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();
-
-    //     float closestDist = Mathf.Infinity;
-    //     EnemyScript closest = null;
-
-    //     foreach (EnemyScript e in enemies)
-    //     {
-    //         if (e == null || e.gameObject == gameObject)
-    //         {
-    //             continue;
-    //         }
-                
-
-    //         EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
-
-    //         if (ep != null && ep.IsPossessed())
-    //         {
-    //             continue;
-    //         }
-                
-
-    //         float dist = Vector3.Distance(transform.position, e.transform.position);
-
-    //         if (dist < closestDist)
-    //         {
-    //             closestDist = dist;
-    //             closest = e;
-    //         }
-    //     }
-
-    //     if (closest == null)
-    //     {
-    //         return;
-    //     }
-            
-
-    //     // unpossess old
-    //     if (currentPossessed != null)
-    //     {
-    //         currentPossessed.SetPossessed(false, null);
-    //     }
-
-    //     EnemyPossessionController controller = closest.GetComponent<EnemyPossessionController>();
-
-    //     if (controller == null)
-    //     {
-    //         controller = closest.gameObject.AddComponent<EnemyPossessionController>();
-    //     }
-            
-
-    //     controller.SetPossessed(true, Camera.main.transform);
-
-    //     currentPossessed = controller;
-
-    //     if (cam != null)
-    //     {
-    //         cam.SetTarget(closest.transform);
-    //     }
-    // }
-
-    // public bool IsPossessing()
-    // {
-    //     return isPossessing;
-    // }
-
-    // private void HandlePossessedAI()
-    // {
-    //     if (GetComponent<PlayerPossessedAI>() == null)
-    //     {
-    //         return;
-    //     }
-
-    // }
-
     public void ForceAttack()
     {
         if (isAttacking)
@@ -791,77 +631,10 @@ public class PlayerCombat : MonoBehaviour
         TryAttack();
     }
 
-
-    // private void HandleAbility1()
-    // {
-    //     if (!ability1Active)
-    //     {
-    //         return;
-    //     }
-            
-
-    //     ability1Timer -= Time.deltaTime;
-
-    //     if (ability1Timer <= 0f)
-    //     {
-    //         EndAbility1();
-    //         return;
-    //     }
-
-    //     HandleAbility1Click();
-    // }
-
-    // private void StartAbility1()
-    // {
-    //     isPossessing = true;
-    //     ability1Active = true;
-    //     possessionTimer = possessionDuration;
-
-    //     SwitchPossessionTarget();
-    // }
-
-    // private void EndAbility1()
-    // {
-    //     ability1Active = false;
-
-    //     Cursor.lockState = CursorLockMode.Locked;
-    //     Cursor.visible = false;
-
-    //     Debug.Log("Ability 1 ended");
-    // }
-
-
-    // private void HandleAbility1Click()
-    // {
-    //     if (!Input.GetMouseButtonDown(0))
-    //     {
-    //         return;
-    //     }
-            
-
-    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-    //     if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-    //     {
-    //         EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
-
-    //         if (enemy == null)
-    //         {
-    //             return;
-    //         }
-                
-
-    //         enemy.TakeDamage(20f);
-
-    //         Vector3 dir = (enemy.transform.position - Camera.main.transform.position);
-    //         dir.y = 0f;
-
-    //         enemy.ApplyKnockback(dir, 6f);
-            
-    //     }
-    // }
-
-    private IEnumerator PushEnemy(CharacterController cc, Vector3 dir)
+    private IEnumerator PushEnemy(
+        CharacterController cc,
+        Vector3 dir
+    )
     {
         float time = 0.15f;
         float t = 0f;
