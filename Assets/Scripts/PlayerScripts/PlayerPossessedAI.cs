@@ -8,7 +8,9 @@ public class PlayerPossessedAI : MonoBehaviour
     [SerializeField] private float attackRange = 2f;
     [SerializeField] private float attackCheckRate = 0.2f;
 
+
     private Transform target;
+
     private PlayerCombat combat;
     private CharacterController controller;
 
@@ -16,19 +18,25 @@ public class PlayerPossessedAI : MonoBehaviour
 
     public bool isActive;
 
+
+
     private void Start()
     {
         combat = GetComponent<PlayerCombat>();
         controller = GetComponent<CharacterController>();
 
+        // stays disabled until possession enables it
         enabled = false;
     }
+
 
     public void SetActive(bool state, Transform followTarget)
     {
         isActive = state;
         target = followTarget;
     }
+
+
 
     private void Update()
     {
@@ -46,12 +54,16 @@ public class PlayerPossessedAI : MonoBehaviour
         HandleAttack();
     }
 
+
+
     private void HandleMovement()
     {
         EnemyScript closest = FindClosestEnemy();
 
+        // default is follow original target ( player body)
         Vector3 moveTarget = target.position;
 
+        // if enemy found, override target
         if (closest != null)
         {
             moveTarget = closest.transform.position;
@@ -64,14 +76,17 @@ public class PlayerPossessedAI : MonoBehaviour
 
         if (closest != null)
         {
+            // stop slightly before reaching attack range
             if (distance <= attackRange * 0.9f)
             {
                 FaceTarget(dir);
                 return;
             }
         }
+
         else
         {
+            // just following player, don't get too close
             if (distance < followDistance)
             {
                 return;
@@ -87,6 +102,8 @@ public class PlayerPossessedAI : MonoBehaviour
 
         FaceTarget(move);
     }
+
+
 
     private void HandleAttack()
     {
@@ -110,9 +127,12 @@ public class PlayerPossessedAI : MonoBehaviour
 
         if (dist <= attackRange)
         {
+            // force player combat to attack as ai
             combat.ForceAttack();
         }
     }
+
+
 
     private void FaceTarget(Vector3 dir)
     {
@@ -126,6 +146,9 @@ public class PlayerPossessedAI : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(dir);
     }
 
+
+
+    //simple nearest enemy search
     private EnemyScript FindClosestEnemy()
     {
         EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();

@@ -35,6 +35,7 @@ public class PlayerStats : MonoBehaviour
         animDie = Animator.StringToHash("Die");
     }
 
+
     public void TakeDamage(float damage)
     {
         PlayerCombat combat = GetComponent<PlayerCombat>();
@@ -58,7 +59,6 @@ public class PlayerStats : MonoBehaviour
         }
 
         Debug.Log("Player took " + damage + " damage. HP: " + currentHealth);
-
         SoundManager.Instance?.PlayPlayerHit();
 
         DamagePopupManager.Instance.SpawnDamagePopup(
@@ -101,6 +101,7 @@ public class PlayerStats : MonoBehaviour
         FindFirstObjectByType<EnemyWaveManager>()?.OnPlayerDied();
     }
 
+
     public void ResetPlayer()
     {
         isDead = false;
@@ -118,6 +119,7 @@ public class PlayerStats : MonoBehaviour
             animator.Update(0f);
         }
     }
+
 
     public void Revive()
     {
@@ -141,6 +143,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log("player revived");
     }
+
 
     public void ResetPosition()
     {

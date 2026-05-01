@@ -1,11 +1,10 @@
 using UnityEngine;
 using System.Collections;
 
-
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Player")]
+    [Header("player")]
     public float movementSpeed = 2.0f;
     public float sprintSpeed = 5.335f;
     public float RotationSmoothTime = 0.12f;
@@ -17,16 +16,57 @@ public class PlayerMovement : MonoBehaviour
     public float JumpTimeout = 0.50f;
     public float FallTimeout = 0.15f;
 
-    [Header("Ground")]
+
+    [Header("ground")]
     public bool Grounded = true;
     public float GroundedOffset = -0.14f;
     public float GroundedRadius = 0.28f;
     public LayerMask GroundLayers;
 
-    [Header("Camera")]
+
+    [Header("camera")]
     public GameObject cameraTarget;
     public float TopClamp = 70.0f;
     public float BottomClamp = -20.0f;
+
+
+    [Header("animation")]
+    public Animator animator;
+
+    private int animSpeed;
+    private int animJump;
+    private int animGrounded;
+
+    private int animNearGround;
+    private int animLand;
+    private int animHardLand;
+
+
+    [Header("landing detection")]
+    [SerializeField] private float nearGroundDistance = 1.2f;
+
+    private bool wasGrounded;
+    private bool isNearGround;
+
+
+    [Header("dodge")]
+    [SerializeField] private float dodgeSpeed = 12f;
+    [SerializeField] private float dodgeDuration = 0.2f;
+    [SerializeField] private float doubleTapTime = 0.25f;
+    [SerializeField] private float dodgeStaminaCost = 15f;
+
+
+    [Header("dodge vfx")]
+    [SerializeField] private GameObject dodgeVFX;
+    [SerializeField] private Transform dodgeVFXSpawnPoint;
+
+
+
+    private CharacterController controller;
+    private GameObject cameraObject;
+    private PlayerCombat combat;
+    private ThirdPersonCamera cam;
+
 
     private float yaw;
     private float pitch;
@@ -39,39 +79,8 @@ public class PlayerMovement : MonoBehaviour
     private float jumpTimer;
     private float fallTimer;
 
-    private CharacterController controller;
-    private GameObject cameraObject;
-    private PlayerCombat combat;
-
     private const float terminalVelocity = 53.0f;
 
-    [Header("Landing Detection")]
-    [SerializeField] private float nearGroundDistance = 1.2f;
-
-    private bool wasGrounded;
-    private bool isNearGround;
-
-    private int animNearGround;
-    private int animLand;
-    private int animHardLand;
-
-    [Header("Animation")]
-    public Animator animator;
-    private int animSpeed;
-    private int animJump;
-    private int animGrounded;
-
-    [Header("Dodge")]
-    [SerializeField] private float dodgeSpeed = 12f;
-    [SerializeField] private float dodgeDuration = 0.2f;
-    [SerializeField] private float doubleTapTime = 0.25f;
-    [SerializeField] private float dodgeStaminaCost = 15f;
-
-    [Header("Dodge VFX")]
-    [SerializeField] private GameObject dodgeVFX;
-    [SerializeField] private Transform dodgeVFXSpawnPoint;
-
-    private ThirdPersonCamera cam;
 
     private float lastATapTime;
     private float lastDTapTime;
@@ -87,30 +96,24 @@ public class PlayerMovement : MonoBehaviour
     private int animDodgeForward;
     private int animDodgeBack;
 
+
     public bool isPossessed;
 
-    //[Header("Ability 3 - Time Freeze")]
-    // [SerializeField] private float timeFreezeDuration = 4f;
-    // [SerializeField] private float freezeTimeScale = 0.05f;
-    // [SerializeField] private float pushForce = 8f;
-    // [SerializeField] private LayerMask enemyLayer;
-    // [SerializeField] private GameObject freezeUI;
 
-    // private bool isTimeFrozenAbilityActive;
-    // private float freezeTimer;
 
     private void Awake()
     {
-        // find main camera reference
+        // grab camera once
         cameraObject = GameObject.FindGameObjectWithTag("MainCamera");
     }
 
+
     private void Start()
     {
-        //references
-        cam = cameraObject.GetComponent<ThirdPersonCamera>();
         controller = GetComponent<CharacterController>();
         combat = GetComponent<PlayerCombat>();
+
+        cam = cameraObject.GetComponent<ThirdPersonCamera>();
 
         yaw = cameraTarget.transform.eulerAngles.y;
 
@@ -124,7 +127,7 @@ public class PlayerMovement : MonoBehaviour
             animator.applyRootMotion = false;
         }
 
-        // animator
+        // animator params
         animSpeed = Animator.StringToHash("Speed");
         animJump = Animator.StringToHash("Jump");
         animGrounded = Animator.StringToHash("Grounded");
@@ -139,6 +142,9 @@ public class PlayerMovement : MonoBehaviour
         animDodgeBack = Animator.StringToHash("DodgeBack");
     }
 
+
+
+    // used by abilities to lock player movement
     private bool IsMovementLocked()
     {
         return AbilityStateManager.Instance != null &&
@@ -150,11 +156,15 @@ public class PlayerMovement : MonoBehaviour
         );
     }
 
+
+
     private void Update()
     {
         PlayerPossessedAI ai = GetComponent<PlayerPossessedAI>();
+
         if (IsMovementLocked())
         {
+            // only fully freeze if ai isn't controlling main charater
             if (ai == null || !ai.enabled)
             {
                 speed = 0f;
@@ -168,24 +178,21 @@ public class PlayerMovement : MonoBehaviour
 
         GroundCheck();
         NearGroundCheck();
+
         Jump();
         Movement();
         HandleDodge();
-
-        // if (cam != null)
-        // {
-        //     Vector3 euler = transform.eulerAngles;
-        //     euler.y = cam.GetYaw();
-        //     transform.eulerAngles = euler;
-        // }
     }
+
 
     private void LateUpdate()
     {
         CameraRotation();
     }
 
-    // playe rinput
+
+
+    // input helpers
     private Vector2 GetMoveInput()
     {
         return new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -206,7 +213,9 @@ public class PlayerMovement : MonoBehaviour
         return Input.GetKey(KeyCode.LeftShift);
     }
 
-    // movement
+
+
+    // main movement
 
     private void Movement()
     {
@@ -219,19 +228,16 @@ public class PlayerMovement : MonoBehaviour
         {
             if (combat.IsAttacking() || combat.IsCharging())
             {
-                // fully stoped horizontal movement
+                // lock movement but still apply gravity
                 speed = 0f;
 
-                // still apply gravity
                 controller.Move(Vector3.up * verticalSpeed * Time.deltaTime);
-
                 return;
             }
         }
 
         Vector2 moveInput = GetMoveInput();
 
-        // lock movement during attack
         if (combat != null && combat.IsAttacking())
         {
             moveInput = Vector2.zero;
@@ -244,7 +250,11 @@ public class PlayerMovement : MonoBehaviour
             targetSpeed = 0f;
         }
 
-        float currentSpeed = new Vector3(controller.velocity.x, 0f, controller.velocity.z).magnitude;
+        float currentSpeed = new Vector3(
+            controller.velocity.x,
+            0f,
+            controller.velocity.z
+        ).magnitude;
 
         float inputMagnitude = moveInput.magnitude > 0f ? 1f : 0f;
 
@@ -252,7 +262,11 @@ public class PlayerMovement : MonoBehaviour
 
         if (currentSpeed < targetSpeed - speedOffset || currentSpeed > targetSpeed + speedOffset)
         {
-            speed = Mathf.Lerp(currentSpeed, targetSpeed * inputMagnitude, Time.deltaTime * accelerationRate);
+            speed = Mathf.Lerp(
+                currentSpeed,
+                targetSpeed * inputMagnitude,
+                Time.deltaTime * accelerationRate
+            );
         }
         else
         {
@@ -263,7 +277,9 @@ public class PlayerMovement : MonoBehaviour
 
         if (moveInput != Vector2.zero)
         {
-            targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg + cameraObject.transform.eulerAngles.y;
+            targetRotation =
+                Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+                cameraObject.transform.eulerAngles.y;
 
             float rotation = Mathf.SmoothDampAngle(
                 transform.eulerAngles.y,
@@ -275,14 +291,15 @@ public class PlayerMovement : MonoBehaviour
             transform.rotation = Quaternion.Euler(0f, rotation, 0f);
         }
 
-        Vector3 moveDirection = Quaternion.Euler(0f, targetRotation, 0f) * Vector3.forward;
+        Vector3 moveDirection =
+            Quaternion.Euler(0f, targetRotation, 0f) * Vector3.forward;
 
         controller.Move(
             moveDirection.normalized * (speed * Time.deltaTime) +
             Vector3.up * verticalSpeed * Time.deltaTime
         );
 
-        // animation speed update
+        // animation + footsteps
         if (animator != null)
         {
             float normalizedSpeed = speed / sprintSpeed;
@@ -303,6 +320,10 @@ public class PlayerMovement : MonoBehaviour
             SoundManager.Instance.HandleFootsteps(normalizedSpeed, isMoving);
         }
     }
+
+
+
+    // dodge system (double tap)
 
     private void HandleDodge()
     {
@@ -348,7 +369,6 @@ public class PlayerMovement : MonoBehaviour
         {
             if (Time.time - lastSTapTime <= doubleTapTime)
             {
-                //TryDodge(-cameraObject.transform.forward);
                 Vector3 forward = cameraObject.transform.forward;
                 forward.y = 0f;
                 forward.Normalize();
@@ -370,6 +390,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+
     private void TryDodge(Vector3 direction)
     {
         if (combat != null)
@@ -384,6 +406,7 @@ public class PlayerMovement : MonoBehaviour
 
         StartDodge(direction);
     }
+
 
     private void StartDodge(Vector3 direction)
     {
@@ -406,6 +429,8 @@ public class PlayerMovement : MonoBehaviour
         SoundManager.Instance?.PlayDodge();
     }
 
+
+
     private void PlayDodgeVFX(Vector3 dir)
     {
         if (dodgeVFX == null)
@@ -426,9 +451,9 @@ public class PlayerMovement : MonoBehaviour
             Quaternion.LookRotation(spawnDir)
         );
 
-        // self cleans after some time
         Destroy(vfx, 1.0f);
     }
+
 
     private void PlayDodgeAnimation(Vector3 dir)
     {
@@ -467,6 +492,8 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
+
+    // jump and gravity
     private void Jump()
     {
         if (Grounded)
@@ -511,8 +538,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // griund check
 
+
+    // ground checks
     private void GroundCheck()
     {
         Vector3 position = new Vector3(
@@ -557,6 +585,7 @@ public class PlayerMovement : MonoBehaviour
         wasGrounded = Grounded;
     }
 
+
     private void NearGroundCheck()
     {
         Vector3 origin = transform.position + Vector3.up * 0.2f;
@@ -575,9 +604,14 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
+
+    // camera look
+
     private void CameraRotation()
     {
-        if (AbilityStateManager.Instance != null && AbilityStateManager.Instance.isFreezeAbilityActive)
+        if (AbilityStateManager.Instance != null &&
+            AbilityStateManager.Instance.isFreezeAbilityActive)
         {
             return;
         }
@@ -591,88 +625,4 @@ public class PlayerMovement : MonoBehaviour
 
         cameraTarget.transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
     }
-
-    // private IEnumerator TimeFreezeAbility()
-    // {
-    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
-
-    //     if (isTimeFrozenAbilityActive)
-    //     {
-    //         yield break;
-    //     }
-            
-
-    //     isTimeFrozenAbilityActive = true;
-    //     freezeTimer = timeFreezeDuration;
-
-    //     if (freezeUI != null)
-    //     {
-    //         freezeUI.SetActive(true);
-    //     }
-            
-
-    //     Time.timeScale = freezeTimeScale;
-    //     Time.fixedDeltaTime = 0.02f * Time.timeScale;
-
-    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(true);
-
-    //     while (freezeTimer > 0f)
-    //     {
-    //         freezeTimer -= Time.unscaledDeltaTime;
-
-    //         HandleFrozenClick();
-
-    //         yield return null;
-    //     }
-
-    //     Time.timeScale = 1f;
-    //     Time.fixedDeltaTime = 0.02f;
-
-    //     if (freezeUI != null)
-    //     {
-    //         freezeUI.SetActive(false);
-    //     }
-            
-
-    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.SetFrozen(false);
-    //     Camera.main?.GetComponent<ThirdPersonCamera>()?.ResetShake();
-
-    //     isTimeFrozenAbilityActive = false;
-
-        
-    // }
-
-
-    // private void HandleFrozenClick()
-    // {
-    //     if (!Input.GetMouseButtonDown(0))
-    //     {
-    //         return;
-    //     }
-            
-
-    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-    //     if (Physics.Raycast(ray, out RaycastHit hit, 100f, enemyLayer))
-    //     {
-    //         EnemyScript enemy = hit.collider.GetComponentInParent<EnemyScript>();
-
-    //         if (enemy != null)
-    //         {
-    //             Vector3 dir = (enemy.transform.position - Camera.main.transform.position).normalized;
-
-    //             enemy.TakeDamage(10f);
-
-    //             Rigidbody rb = enemy.GetComponent<Rigidbody>();
-    //             if (rb != null)
-    //             {
-    //                 rb.AddForce(dir * pushForce, ForceMode.Impulse);
-    //             }
-    //             else
-    //             {
-    //                 enemy.transform.position += dir * pushForce * 0.1f;
-    //             }
-    //         }
-    //     }
-    // }
 }

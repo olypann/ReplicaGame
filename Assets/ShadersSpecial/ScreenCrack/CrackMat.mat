@@ -33,7 +33,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Damage: 0.6388927
+    - _Damage: 0
     - _DamageStep: 45
     - _Seed: 425.8103
     m_Colors: []

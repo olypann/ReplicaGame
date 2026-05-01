@@ -20,6 +20,7 @@ public class WeaponScript : MonoBehaviour
         {
             return;
         }
+        
 
         // boss first
         WormBossPartHealth bossPart = other.GetComponentInParent<WormBossPartHealth>();
@@ -35,12 +36,12 @@ public class WeaponScript : MonoBehaviour
             return;
         }
 
+
         EnemyScript enemy = other.GetComponent<EnemyScript>();
 
         if (enemy != null && !hitEnemies.Contains(enemy))
         {
             hitEnemies.Add(enemy);
-
             enemy.TakeDamage(playerCombat.GetCurrentDamage());
 
             playerCombat.AddAbilityCharge(playerCombat.abilityGainPerHit);
@@ -48,6 +49,7 @@ public class WeaponScript : MonoBehaviour
             SoundManager.Instance?.PlayAttack1Hit();
         }
     }
+
 
     public void ResetHits()
     {
