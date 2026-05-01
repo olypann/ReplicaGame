@@ -9,13 +9,18 @@ public class PossessionAbility : MonoBehaviour
     [SerializeField] private float possessionDuration = 15f;
 
     [SerializeField] private TMP_Text abilityText;
-
     [SerializeField] private TextMeshProUGUI timerText;
 
-    private PlayerMovement movement;
 
+    //refs
+
+    private PlayerMovement movement;
     private PlayerCombat combat;
     private ThirdPersonCamera cam;
+    private PlayerPossessedAI playerAI;
+
+
+    // runtime
 
     private bool isPossessing;
     private float possessionTimer;
@@ -23,17 +28,17 @@ public class PossessionAbility : MonoBehaviour
     private EnemyPossessionController currentPossessed;
 
     public bool IsPossessing => isPossessing;
-    private PlayerPossessedAI playerAI;
+
+
 
     private void Start()
     {
         combat = GetComponent<PlayerCombat>();
         cam = Camera.main.GetComponent<ThirdPersonCamera>();
-
         movement = GetComponent<PlayerMovement>();
-
         playerAI = GetComponent<PlayerPossessedAI>();
     }
+
 
     private void Update()
     {
@@ -41,10 +46,13 @@ public class PossessionAbility : MonoBehaviour
         HandlePossessionUpdate();
     }
 
+
+
     private void HandleInput()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
+            // block if another ability is running
             if (AbilityStateManager.Instance != null &&
                 AbilityStateManager.Instance.IsAnyAbilityActive())
             {
@@ -61,6 +69,7 @@ public class PossessionAbility : MonoBehaviour
                 return;
             }
 
+            // need full charge
             if (!combat.HasFullAbilityCharge())
             {
                 return;
@@ -75,18 +84,23 @@ public class PossessionAbility : MonoBehaviour
             return;
         }
 
+        // switch target while active
         if (Input.GetKeyDown(KeyCode.E))
         {
             SwitchTarget();
         }
     }
 
+
+
     private void StartPossession()
     {
         AbilityStateManager.Instance.isAbilityActive = true;
+
         isPossessing = true;
         possessionTimer = possessionDuration;
 
+        // immediately grab something
         SwitchTarget();
 
         if (abilityText != null)
@@ -99,6 +113,7 @@ public class PossessionAbility : MonoBehaviour
             timerText.text = Mathf.Ceil(possessionTimer).ToString();
         }
 
+        // enable player ai override while possessing
         if (playerAI != null)
         {
             playerAI.enabled = true;
@@ -110,6 +125,8 @@ public class PossessionAbility : MonoBehaviour
             AbilityStateManager.Instance.isAbilityActive = true;
         }
     }
+
+
 
     private void HandlePossessionUpdate()
     {
@@ -129,21 +146,24 @@ public class PossessionAbility : MonoBehaviour
         {
             EndPossession();
         }
-
-
     }
+
+
 
     private void EndPossession()
     {
         AbilityStateManager.Instance.isAbilityActive = false;
+
         isPossessing = false;
 
+        // release current enemy
         if (currentPossessed != null)
         {
             currentPossessed.SetPossessed(false, null);
             currentPossessed = null;
         }
 
+        // reset camera back to player
         if (cam != null)
         {
             cam.RestoreNormalControl();
@@ -159,7 +179,8 @@ public class PossessionAbility : MonoBehaviour
         {
             AbilityStateManager.Instance.isAbilityActive = false;
         }
-        
+
+        // disable ai override
         if (playerAI != null)
         {
             playerAI.SetActive(false, null);
@@ -172,6 +193,9 @@ public class PossessionAbility : MonoBehaviour
         }
     }
 
+
+
+    // finds closest valid enemy and switches to it
     private void SwitchTarget()
     {
         EnemyScript[] enemies = FindObjectsOfType<EnemyScript>();
@@ -188,6 +212,7 @@ public class PossessionAbility : MonoBehaviour
 
             EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
 
+            // skip already possessed enemies
             if (ep != null && ep.IsPossessed())
             {
                 continue;
@@ -207,6 +232,7 @@ public class PossessionAbility : MonoBehaviour
             return;
         }
 
+        // release previous
         if (currentPossessed != null)
         {
             currentPossessed.SetPossessed(false, null);
@@ -229,15 +255,21 @@ public class PossessionAbility : MonoBehaviour
         }
     }
 
+
+
     private void LateUpdate()
     {
         ValidateCurrentPossession();
     }
 
+
+    // makes sure current target is still valid
     private void ValidateCurrentPossession()
     {
         if (!isPossessing)
+        {
             return;
+        }
 
         if (!currentPossessed.IsValidTarget())
         {
@@ -251,16 +283,20 @@ public class PossessionAbility : MonoBehaviour
         }
 
         EnemyScript enemy = null;
+
         if (currentPossessed != null)
         {
             enemy = currentPossessed.GetComponent<EnemyScript>();
-        }        
+        }
 
-        if (enemy == null || enemy.IsDead()) // assume you have IsDead or similar
+        // if enemy died or invalid, switch or end
+        if (enemy == null || enemy.IsDead())
         {
             SwitchTargetOrEnd();
         }
     }
+
+
 
     private void SwitchTargetOrEnd()
     {
@@ -271,12 +307,17 @@ public class PossessionAbility : MonoBehaviour
 
         foreach (var e in enemies)
         {
-            if (e == null) continue;
+            if (e == null)
+            {
+                continue;
+            }
 
             EnemyPossessionController ep = e.GetComponent<EnemyPossessionController>();
 
             if (ep != null && ep.IsPossessed())
+            {
                 continue;
+            }
 
             float dist = Vector3.Distance(transform.position, e.transform.position);
 
@@ -293,12 +334,14 @@ public class PossessionAbility : MonoBehaviour
             return;
         }
 
-        // force camera reset BEFORE ending possession
+        //  end ability
         cam?.RestoreNormalControl();
         cam?.SnapToTargetInstant(transform);
 
         EndPossession();
     }
+
+
 
     private void SwitchTo(EnemyScript target)
     {
@@ -312,7 +355,9 @@ public class PossessionAbility : MonoBehaviour
         EnemyPossessionController controller = target.GetComponent<EnemyPossessionController>();
 
         if (controller == null)
+        {
             controller = target.gameObject.AddComponent<EnemyPossessionController>();
+        }
 
         controller.SetPossessed(true, Camera.main.transform);
 

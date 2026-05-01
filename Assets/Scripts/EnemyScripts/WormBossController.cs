@@ -11,14 +11,22 @@ public class WormBossController : MonoBehaviour
         Split
     }
 
+
+    // target + main body stuff
+
     [Header("Target")]
     [SerializeField] private Transform player;
 
+    // index 0 is always the head
     [Header("Body Parts (0 = head)")]
     [SerializeField] private List<Transform> parts = new List<Transform>();
 
+    // enemy scripts attached to each segment
     [Header("Enemy Scripts on Parts")]
     [SerializeField] private List<EnemyScript> partEnemies = new List<EnemyScript>();
+
+
+    // orbit behaviour settings
 
     [Header("Orbit Settings")]
     [SerializeField] private float fastRadius = 6f;
@@ -30,10 +38,16 @@ public class WormBossController : MonoBehaviour
     [SerializeField] private float fastSpeed = 2f;
     [SerializeField] private float calmSpeed = 0.7f;
 
+
+    // general movement + chain follow
+
     [Header("Movement")]
     [SerializeField] private float headLerpSpeed = 6f;
     [SerializeField] private float chainSpeed = 10f;
     [SerializeField] private float segmentDistance = 1.2f;
+
+
+    // dive attack
 
     [Header("Dive Attack")]
     [SerializeField] private float diveSpeed = 18f;
@@ -41,12 +55,23 @@ public class WormBossController : MonoBehaviour
     [SerializeField] private float diveDamageRange = 2.5f;
     [SerializeField] private float diveDamage = 20f;
 
+
+    // split attack
+
     [Header("Split Attack")]
     [SerializeField] private float splitDuration = 4f;
     [SerializeField] private float splitForce = 6f;
 
+
+    // misc helpers
+
     [Header("Ground Offset")]
     [SerializeField] private float groundOffset = 1.5f;
+
+    [SerializeField] private float maxHeightAboveGround = 3f;
+
+
+    // timing for switching states
 
     [Header("State Timing")]
     [SerializeField] private float minStateTime = 2f;
@@ -55,10 +80,17 @@ public class WormBossController : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float calmChance = 0.4f;
 
-    [SerializeField] private float lowestHeadHeight = 0.15f;
-    private int startingPartCount;
 
-    // runtime
+    // reset if player ignores boss too long
+
+    [Header("Reset")]
+    [SerializeField] private float noHitResetTime = 15f;
+    [SerializeField] private Vector3 resetPosition = new Vector3(-0.18f, 2f, 0.02f);
+
+
+
+    // runtime stuff
+
     private BossState state;
     private float stateTimer;
     private float orbitT;
@@ -69,17 +101,14 @@ public class WormBossController : MonoBehaviour
     private Vector3 diveTarget;
     private Vector3[] splitVelocities;
 
-    [SerializeField] private float maxHeightAboveGround = 3f;
-    [SerializeField] private float heightClampSpeed = 10f;
-
-    [Header("boss reset")]
-    [SerializeField] private float noHitResetTime = 15f;
-    [SerializeField] private Vector3 resetPosition = new Vector3(-0.18f, 2f, 0.02f);
-
     private float lastHitTime;
+    private int startingPartCount;
 
-    private void Start()
+
+
+    void Start()
     {
+        // try grab player automatically if not set
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -96,54 +125,58 @@ public class WormBossController : MonoBehaviour
         stateTimer = Random.Range(minStateTime, maxStateTime);
 
         splitVelocities = new Vector3[Mathf.Max(1, parts.Count)];
-
         startingPartCount = parts.Count;
 
+        // boss controls all segments by default
         SetBossControl(true);
 
-        Debug.Log("[Boss] START → ORBIT FAST");
+        Debug.Log("start orbit fast");
     }
 
-    private void Update()
+    void Update()
     {
         CleanupDestroyedParts();
 
         if (player == null || parts.Count == 0)
+        {
             return;
+        }
 
         stateTimer -= Time.deltaTime;
 
+        // if player hasn't touched boss in a while, pull it back
         if (Time.time - lastHitTime >= noHitResetTime)
         {
             ForceReturnToCenter();
         }
 
-        switch (state)
+        // basic state machine
+        if (state == BossState.Orbit_Fast || state == BossState.Orbit_Calm)
         {
-            case BossState.Orbit_Fast:
-            case BossState.Orbit_Calm:
-                Orbit();
-                HandleTransitions();
-                break;
-
-            case BossState.Dive:
-                Dive();
-                break;
-
-            case BossState.Split:
-                Split();
-                break;
+            Orbit();
+            HandleTransitions();
+        }
+        else if (state == BossState.Dive)
+        {
+            Dive();
+        }
+        else if (state == BossState.Split)
+        {
+            Split();
         }
 
+        // don't chain while split since parts are doing their own thing
         if (state != BossState.Split)
+        {
             UpdateChain();
+        }
 
         CheckBossDeath();
     }
 
-    // ================= ORBIT =================
 
-    // replace your Orbit() method with this
+
+    // orbiting around the player with some height variation
     private void Orbit()
     {
         bool calm = state == BossState.Orbit_Calm;
@@ -153,11 +186,8 @@ public class WormBossController : MonoBehaviour
 
         orbitT += Time.deltaTime * speed;
 
-        // IMPORTANT: use player XZ only, NEVER player Y (jumping was lifting boss)
         Vector3 center = player.position;
-        float playerGround = GetGroundY(player.position);
-
-        center.y = playerGround;
+        center.y = GetGroundY(player.position);
 
         Vector3 offset = new Vector3(
             Mathf.Cos(orbitT),
@@ -169,42 +199,45 @@ public class WormBossController : MonoBehaviour
 
         float groundY = GetGroundY(target);
 
-        // body count excluding head
-        int totalBodyParts = Mathf.Max(0, startingPartCount - 1);
-        int aliveBodyParts = Mathf.Max(0, parts.Count - 1);
-        bool headOnly = aliveBodyParts <= 0;
+        int aliveBody = Mathf.Max(0, parts.Count - 1);
+        bool headOnly = aliveBody <= 0;
 
-        float desiredHeight;
+        float height;
         float bob;
 
+        // tweak movement depending on how many parts are left
         if (headOnly)
         {
-            // GUARANTEED low head phase
-            desiredHeight = 0.08f;
+            height = 0.08f;
             bob = Mathf.Sin(orbitT * 4f) * 0.05f;
         }
         else if (calm)
         {
-            desiredHeight = 0.45f;
+            height = 0.45f;
             bob = Mathf.Sin(orbitT * 3f) * 0.28f;
         }
         else
         {
-            desiredHeight = 0.9f;
+            height = 0.9f;
             bob = Mathf.Sin(orbitT * 2.5f) * 0.45f;
         }
 
-        target.y = groundY + desiredHeight + bob;
+        target.y = groundY + height + bob;
 
-        // hard clamp near ground
         if (headOnly)
+        {
             target.y = Mathf.Clamp(target.y, groundY + 0.02f, groundY + 0.22f);
+        }
         else
+        {
             target.y = Mathf.Clamp(target.y, groundY + 0.03f, groundY + 1.2f);
+        }
 
         MoveHead(target);
     }
 
+
+    // smooth head movement + keeping it from flying too high
     private void MoveHead(Vector3 target)
     {
         Transform head = parts[0];
@@ -228,7 +261,7 @@ public class WormBossController : MonoBehaviour
         head.position = pos;
     }
 
-    // ================= DIVE =================
+
 
     private void StartDive()
     {
@@ -238,9 +271,10 @@ public class WormBossController : MonoBehaviour
         diveTarget = player.position;
         diveHit = false;
 
-        Debug.Log("[Boss] STATE → DIVE");
+        Debug.Log("[Boss] dive");
     }
 
+    // straight line dive towards saved position
     private void Dive()
     {
         Transform head = parts[0];
@@ -254,6 +288,7 @@ public class WormBossController : MonoBehaviour
             diveSpeed * Time.deltaTime
         );
 
+        // only damage once per dive
         if (!diveHit && Vector3.Distance(head.position, player.position) < diveDamageRange)
         {
             PlayerStats stats = player.GetComponent<PlayerStats>();
@@ -261,7 +296,6 @@ public class WormBossController : MonoBehaviour
             if (stats != null)
             {
                 stats.TakeDamage(diveDamage);
-                Debug.Log("[Boss] DIVE HIT PLAYER");
             }
 
             diveHit = true;
@@ -273,7 +307,7 @@ public class WormBossController : MonoBehaviour
         }
     }
 
-    // ================= SPLIT =================
+
 
     private void StartSplit()
     {
@@ -281,9 +315,10 @@ public class WormBossController : MonoBehaviour
         stateTimer = splitDuration;
         isSplitting = true;
 
-        SetBossControl(false); // 🔥 ENEMY AI ENABLED
+        // let each segment act on its own
+        SetBossControl(false);
 
-        Debug.Log("[Boss] STATE → SPLIT (ENEMY AI ENABLED)");
+        Debug.Log("[Boss] split");
 
         for (int i = 1; i < parts.Count; i++)
         {
@@ -291,6 +326,7 @@ public class WormBossController : MonoBehaviour
         }
     }
 
+    // segments scatter but still kinda drift toward player
     private void Split()
     {
         Transform head = parts[0];
@@ -323,37 +359,35 @@ public class WormBossController : MonoBehaviour
         if (stateTimer <= 0f)
         {
             isSplitting = false;
-            SetBossControl(true); // 🔥 RETURN CONTROL
 
+            SetBossControl(true);
             SetOrbitFast();
-
-            Debug.Log("[Boss] SPLIT END → ORBIT FAST");
         }
     }
 
-    // ================= CHAIN =================
 
+
+    // makes segments follow each other like a chain
     private void UpdateChain()
     {
         if (parts == null || parts.Count == 0)
+        {
             return;
+        }
 
         Transform prev = parts[0];
-
-        if (prev == null)
-            return;
 
         for (int i = 1; i < parts.Count; i++)
         {
             Transform part = parts[i];
 
             if (part == null || prev == null)
+            {
                 continue;
+            }
 
             Vector3 target = prev.position;
-
             Vector3 dir = (part.position - target).normalized;
-
             Vector3 follow = target + dir * segmentDistance;
 
             part.position = Vector3.Lerp(
@@ -366,12 +400,14 @@ public class WormBossController : MonoBehaviour
         }
     }
 
-    // ================= TRANSITIONS =================
+
 
     private void HandleTransitions()
     {
         if (stateTimer > 0f)
+        {
             return;
+        }
 
         stateTimer = Random.Range(minStateTime, maxStateTime);
 
@@ -394,42 +430,48 @@ public class WormBossController : MonoBehaviour
     private void SetOrbitFast()
     {
         state = BossState.Orbit_Fast;
-        Debug.Log("[Boss] STATE → ORBIT FAST");
     }
 
     private void SetOrbitCalm()
     {
         state = BossState.Orbit_Calm;
-        Debug.Log("[Boss] STATE → ORBIT CALM");
     }
 
-    // ================= CONTROL =================
 
+
+    // switch whether segments listen to boss or their own scripts
     private void SetBossControl(bool value)
     {
         foreach (EnemyScript e in partEnemies)
         {
             if (e != null)
+            {
                 e.controlledByBoss = value;
+            }
         }
     }
 
-    // ================= GROUND =================
 
+
+    // raycast down to find ground height
     private float GetGroundY(Vector3 pos)
     {
         RaycastHit hit;
-
         Vector3 origin = pos + Vector3.up * 50f;
 
         if (Physics.Raycast(origin, Vector3.down, out hit, 200f))
+        {
             return hit.point.y;
+        }
 
         return pos.y;
     }
 
+
+
     private void CleanupDestroyedParts()
     {
+        // go backwards so removing doesn't mess up indices
         for (int i = parts.Count - 1; i >= 0; i--)
         {
             if (parts[i] == null)
@@ -437,32 +479,28 @@ public class WormBossController : MonoBehaviour
                 parts.RemoveAt(i);
 
                 if (i < partEnemies.Count)
+                {
                     partEnemies.RemoveAt(i);
-
-                Debug.Log("[Boss] Removed destroyed part safely");
+                }
             }
         }
     }
 
-
     private void CheckBossDeath()
     {
-        bool anyAlive = false;
+        bool alive = false;
 
-        // head + body all must be null OR dead
         for (int i = 0; i < parts.Count; i++)
         {
             if (parts[i] != null && parts[i].gameObject.activeInHierarchy)
             {
-                anyAlive = true;
+                alive = true;
                 break;
             }
         }
 
-        if (!anyAlive)
+        if (!alive)
         {
-            Debug.Log("[Boss] ALL PARTS DEAD → DESTROY BOSS ROOT");
-
             Destroy(gameObject);
         }
     }
@@ -475,14 +513,16 @@ public class WormBossController : MonoBehaviour
         }
 
         EnemyScript enemy = part.GetComponent<EnemyScript>();
+
         if (enemy != null)
         {
             partEnemies.Remove(enemy);
         }
-
-        Debug.Log("[Boss] Part removed: " + part.name);
     }
 
+
+
+    // slowly pulls boss back if player stops interacting
     private void ForceReturnToCenter()
     {
         Transform head = parts[0];

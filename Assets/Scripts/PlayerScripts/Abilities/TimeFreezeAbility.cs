@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-
 using TMPro;
 
 public class TimeFreezeAbility : MonoBehaviour
@@ -15,23 +14,30 @@ public class TimeFreezeAbility : MonoBehaviour
     [SerializeField] private TMP_Text abilityText;
     [SerializeField] private TextMeshProUGUI timerText;
 
+
     [Header("fx")]
     [SerializeField] private GameObject clickHitVFX;
+
+
 
     private bool isActive;
     private float timer;
 
     private PlayerCombat combat;
 
+
+
     private void Start()
     {
         combat = GetComponent<PlayerCombat>();
     }
 
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
+            // block if something else is running
             if (AbilityStateManager.Instance != null &&
                 AbilityStateManager.Instance.IsAnyAbilityActive())
             {
@@ -45,6 +51,7 @@ public class TimeFreezeAbility : MonoBehaviour
                     return;
                 }
 
+                // need full charge
                 if (!combat.HasFullAbilityCharge())
                 {
                     return;
@@ -63,6 +70,8 @@ public class TimeFreezeAbility : MonoBehaviour
         HandleClick();
     }
 
+
+
     private IEnumerator RunFreeze()
     {
         if (AbilityStateManager.Instance != null)
@@ -76,8 +85,10 @@ public class TimeFreezeAbility : MonoBehaviour
         }
 
         isActive = true;
+
         AbilityStateManager.Instance.isAbilityActive = true;
         AbilityStateManager.Instance.isFreezeAbilityActive = true;
+
         timer = duration;
 
         if (freezeUI != null)
@@ -90,6 +101,7 @@ public class TimeFreezeAbility : MonoBehaviour
             abilityText.text = "Click Frozen Enemies";
         }
 
+        //slow everything down
         Time.timeScale = freezeTimeScale;
         Time.fixedDeltaTime = 0.02f * Time.timeScale;
 
@@ -107,14 +119,18 @@ public class TimeFreezeAbility : MonoBehaviour
             yield return null;
         }
 
+        // allow cursor again before exiting
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         EndFreeze();
     }
 
+
+
     private void EndFreeze()
     {
+        // restore time back to normal
         Time.timeScale = 1f;
         Time.fixedDeltaTime = 0.02f;
 
@@ -149,6 +165,9 @@ public class TimeFreezeAbility : MonoBehaviour
         AbilityStateManager.Instance.isAbilityActive = false;
     }
 
+
+
+    // clicking enemies while time is slowed
     private void HandleClick()
     {
         if (!Input.GetMouseButtonDown(0))
@@ -181,6 +200,8 @@ public class TimeFreezeAbility : MonoBehaviour
 
                 Rigidbody rb = enemy.GetComponent<Rigidbody>();
 
+
+                // try physics push first, fallback if no rigidbody
                 if (rb != null)
                 {
                     rb.AddForce(dir * pushForce, ForceMode.Impulse);

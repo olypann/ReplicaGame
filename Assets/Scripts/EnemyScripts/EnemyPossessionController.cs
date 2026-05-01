@@ -9,48 +9,62 @@ public class EnemyPossessionController : MonoBehaviour
     private Transform playerCamera;
     private CharacterController controller;
 
+
+
     [Header("movement")]
     [SerializeField] private float moveSpeed = 4f;
+
+
 
     [Header("attack")]
     [SerializeField] private float lungeForce = 10f;
     [SerializeField] private float attackCooldown = 0.6f;
     [SerializeField] private float attackDamage = 20f;
 
-    private float cooldown;
 
-    [Header("ability timer")]
+
+    [Header("possession timer")]
     [SerializeField] private float possessionDuration = 15f;
 
     private float possessionTimer;
+    private float cooldown;
+
+
+
     [Header("ui")]
     [SerializeField] private TextMeshProUGUI possessionTimerText;
+
+
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
     }
 
+
+
     public void SetPossessed(bool state, Transform cam)
     {
         isPossessed = state;
         playerCamera = cam;
 
+        // sync global ability state so other systems know player control has shifted
         if (AbilityStateManager.Instance != null)
         {
             AbilityStateManager.Instance.isAbilityActive = state;
         }
+        
 
-        if (state == true)
+        if (state)
         {
             possessionTimer = possessionDuration;
+
             if (possessionTimerText != null)
             {
                 possessionTimerText.gameObject.SetActive(true);
             }
-            StartCoroutine(PossessionCountdown());
 
-            
+            StartCoroutine(PossessionCountdown());
         }
         else
         {
@@ -60,6 +74,8 @@ public class EnemyPossessionController : MonoBehaviour
             }
         }
     }
+
+
 
     private void Update()
     {
@@ -71,6 +87,8 @@ public class EnemyPossessionController : MonoBehaviour
         HandleMovement();
         HandleAttack();
     }
+
+
 
     private void HandleMovement()
     {
@@ -84,11 +102,13 @@ public class EnemyPossessionController : MonoBehaviour
 
         Vector3 move = forward * input.y + right * input.x;
 
+        // rotate into movement direction so possessed enemy feels responsive
         if (move.magnitude > 0.1f)
         {
             transform.rotation = Quaternion.LookRotation(move);
         }
 
+        // character controller fallback so it still works if controller missing
         if (controller != null)
         {
             controller.Move(move.normalized * moveSpeed * Time.deltaTime);
@@ -97,7 +117,10 @@ public class EnemyPossessionController : MonoBehaviour
         {
             transform.position += move.normalized * moveSpeed * Time.deltaTime;
         }
+
     }
+
+
 
     private void HandleAttack()
     {
@@ -116,6 +139,9 @@ public class EnemyPossessionController : MonoBehaviour
         }
     }
 
+
+
+
     private IEnumerator DoLunge()
     {
         float time = 0.2f;
@@ -123,6 +149,7 @@ public class EnemyPossessionController : MonoBehaviour
 
         Vector3 dir = transform.forward;
 
+        // quick forward burst attack
         while (t < time)
         {
             t += Time.deltaTime;
@@ -139,6 +166,8 @@ public class EnemyPossessionController : MonoBehaviour
             yield return null;
         }
 
+
+        // small aoe hit after lunge connects
         Collider[] hits = Physics.OverlapSphere(transform.position, 2f);
 
         foreach (Collider hit in hits)
@@ -152,10 +181,14 @@ public class EnemyPossessionController : MonoBehaviour
         }
     }
 
+
+
     public bool IsPossessed()
     {
         return isPossessed;
     }
+
+
 
     private IEnumerator PossessionCountdown()
     {
@@ -168,6 +201,7 @@ public class EnemyPossessionController : MonoBehaviour
                 possessionTimerText.text = Mathf.Ceil(possessionTimer).ToString();
             }
 
+            // timer runs out, force exit possession
             if (possessionTimer <= 0f)
             {
                 SetPossessed(false, playerCamera);
@@ -177,6 +211,8 @@ public class EnemyPossessionController : MonoBehaviour
             yield return null;
         }
     }
+
+
 
     public bool IsValidTarget()
     {

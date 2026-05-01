@@ -24,6 +24,7 @@ public class WormBossPart : MonoBehaviour
 
         headHealth = GetComponentInParent<WormBossHeadHealth>();
     }
+    
 
     public void TakeDamage(float dmg)
     {

@@ -4,36 +4,65 @@ using UnityEngine;
 public class EnemyScript : MonoBehaviour
 {
     public bool cameraOnlyEnemy;
-    [Header("Target")]
+
+
+
+    [Header("target")]
     [SerializeField] private Transform player;
 
     private PlayerStats playerStats;
 
-    [Header("Boss Control")]
+
+
+    [Header("boss control")]
     public bool controlledByBoss = false;
 
-    [Header("Movement")]
+
+
+    [Header("movement")]
     [SerializeField] private float moveSpeed = 3.5f;
     [SerializeField] private float stopDistance = 2f;
     [SerializeField] private float rotationSpeed = 8f;
 
-    [Header("Combat")]
+
+
+    [Header("combat")]
     [SerializeField] private float attackDamage = 10f;
     [SerializeField] private float attackCooldown = 1.5f;
     [SerializeField] private float attackLungeDistance = 1.2f;
     [SerializeField] private float attackLungeTime = 0.12f;
 
-    [Header("Health")]
+
+
+    [Header("health")]
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private Unity.UI.Shaders.Sample.CustomSlider healthSlider;
 
-    [Header("AI")]
+
+
+    [Header("ai")]
     [SerializeField] private float aggroRadius = 10f;
     [SerializeField] private float patrolRadius = 6f;
     [SerializeField] private float patrolChangeTime = 3f;
 
+
+
+    [Header("vfx")]
+    [SerializeField] private GameObject damageVFX;
+    [SerializeField] private Transform damageVFXPoint;
+    [SerializeField] private float damageVFXLife = 1.5f;
+
+
+
+    [Header("ui")]
+    [SerializeField] private float uiSmoothSpeed = 8f;
+
+
+
+    // runtime state
     private Vector3 startPos;
     private Vector3 patrolTarget;
+
     private float patrolTimer;
     private bool isAggroed;
 
@@ -47,17 +76,12 @@ public class EnemyScript : MonoBehaviour
     private Vector3 knockbackVelocity;
     private float knockbackDecay = 10f;
 
-    [SerializeField] private float uiSmoothSpeed = 8f;
-
-    private Coroutine squishRoutine;
-
     private float healthVisual;
 
-    [SerializeField] private GameObject damageVFX;
-    [SerializeField] private Transform damageVFXPoint;
-    [SerializeField] private float damageVFXLife = 1.5f;
-
+    private Coroutine squishRoutine;
     private float lastSquishTime;
+
+
 
     private void Start()
     {
@@ -66,36 +90,25 @@ public class EnemyScript : MonoBehaviour
         startPos = transform.position;
         patrolTarget = GetRandomPatrolPoint();
 
+        healthVisual = currentHealth / maxHealth;
+
         if (healthSlider != null)
         {
-            float normalized = currentHealth / maxHealth;
-            healthSlider.SetValue(normalized);
+            healthSlider.SetValue(healthVisual);
         }
 
-        healthVisual = currentHealth / maxHealth;
+
 
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
 
-        Debug.Log("Player Object: " + playerObject);
-
         if (playerObject != null)
         {
-            Debug.Log("Components on Player:");
-
-            Component[] comps = playerObject.GetComponents<Component>();
-
-            foreach (Component c in comps)
-            {
-                Debug.Log(c.GetType().Name);
-            }
-
             player = playerObject.transform;
-
             playerStats = playerObject.GetComponent<PlayerStats>();
-
-            Debug.Log("PlayerStats found: " + playerStats);
         }
     }
+
+
 
     private void Update()
     {
@@ -111,78 +124,84 @@ public class EnemyScript : MonoBehaviour
         }
 
         if (controlledByBoss)
-        return;
+        {
+            return;
+        }
 
         cooldownTimer -= Time.deltaTime;
 
-        //enemy just patrols and ignores player logic
+
+
+        // camera-only enemies just react differently
         if (cameraOnlyEnemy)
         {
-            if (player != null)
-            {
-                float distance = Vector3.Distance(transform.position, player.position);
-
-                if (distance <= aggroRadius)
-                {
-                    isAggroed = true;
-                }
-                else
-                {
-                    isAggroed = false;
-                }
-
-                if (isAggroed)
-                {
-                    RotateTowardsPlayer();
-                }
-                else
-                {
-                    Patrol();
-                }
-            }
-            else
-            {
-                Patrol();
-            }
+            HandleCameraOnlyBehaviour();
         }
-        else if (player != null)
+        else
         {
-            float distance = Vector3.Distance(transform.position, player.position);
+            HandleStandardBehaviour();
+        }
 
-            if (distance <= aggroRadius)
-            {
-                isAggroed = true;
-            }
-            else
-            {
-                isAggroed = false;
-            }
+        UpdateUI();
+    }
 
+
+
+    private void HandleCameraOnlyBehaviour()
+    {
+        if (player == null)
+        {
+            Patrol();
+            return;
+        }
+
+        float distance = Vector3.Distance(transform.position, player.position);
+
+        isAggroed = distance <= aggroRadius;
+
+        if (isAggroed)
+        {
             RotateTowardsPlayer();
-
-            if (isAggroed)
-            {
-                if (distance > stopDistance)
-                {
-                    MoveTowardsPlayer();
-                }
-                else
-                {
-                    AttackPlayer();
-                }
-            }
-            else
-            {
-                Patrol();
-            }
         }
         else
         {
             Patrol();
         }
-
-        UpdateUI();
     }
+
+
+
+    private void HandleStandardBehaviour()
+    {
+        if (player == null)
+        {
+            Patrol();
+            return;
+        }
+
+        float distance = Vector3.Distance(transform.position, player.position);
+
+        isAggroed = distance <= aggroRadius;
+
+        RotateTowardsPlayer();
+
+        if (!isAggroed)
+        {
+            Patrol();
+            return;
+        }
+
+        if (distance > stopDistance)
+        {
+            MoveTowardsPlayer();
+        }
+        else
+        {
+            AttackPlayer();
+        }
+    }
+
+
 
     private void UpdateUI()
     {
@@ -196,14 +215,17 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
-    //player movement system 
+
+
+    // movement
 
     private void MoveTowardsPlayer()
     {
         Vector3 direction = (player.position - transform.position).normalized;
-
         transform.position += direction * moveSpeed * Time.deltaTime;
     }
+
+
 
     private void RotateTowardsPlayer()
     {
@@ -224,7 +246,9 @@ public class EnemyScript : MonoBehaviour
         );
     }
 
-    //patrol system
+
+
+    // patrol
 
     private void Patrol()
     {
@@ -252,15 +276,17 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
+
+
     private Vector3 GetRandomPatrolPoint()
     {
         Vector2 random = Random.insideUnitCircle * patrolRadius;
-
         return new Vector3(startPos.x + random.x, transform.position.y, startPos.z + random.y);
     }
 
-    //player combat and attacks
 
+
+    // combat
     private void AttackPlayer()
     {
         if (cooldownTimer > 0f)
@@ -284,12 +310,15 @@ public class EnemyScript : MonoBehaviour
         StartCoroutine(DoAttack());
     }
 
+
+
     private IEnumerator DoAttack()
     {
         isAttacking = true;
 
         Vector3 startPos = transform.position;
         Vector3 targetPos = startPos;
+
 
         if (player != null)
         {
@@ -299,13 +328,14 @@ public class EnemyScript : MonoBehaviour
 
         float t = 0f;
 
-        // quick jump forward
+
+
+        // lunge forward
         while (t < attackLungeTime)
         {
             t += Time.deltaTime;
 
             float progress = t / attackLungeTime;
-
             float height = Mathf.Sin(progress * Mathf.PI) * 0.4f;
 
             transform.position = Vector3.Lerp(startPos, targetPos, progress);
@@ -316,7 +346,9 @@ public class EnemyScript : MonoBehaviour
 
         transform.position = targetPos;
 
-        PlayerCombat combat = playerStats.GetComponent<PlayerCombat>();
+
+
+        PlayerCombat combat = playerStats != null ? playerStats.GetComponent<PlayerCombat>() : null;
 
         if (combat == null || !combat.IsInvulnerable())
         {
@@ -325,18 +357,17 @@ public class EnemyScript : MonoBehaviour
                 playerStats.TakeDamage(attackDamage);
             }
 
-            Debug.Log("Enemy attacked player for " + attackDamage);
         }
 
-        // snap back fast after bite
-        t = 0f;
 
+
+        // return back
+        t = 0f;
         while (t < attackLungeTime * 0.65f)
         {
             t += Time.deltaTime;
 
             float progress = t / (attackLungeTime * 0.65f);
-
             float height = Mathf.Sin(progress * Mathf.PI) * 0.15f;
 
             transform.position = Vector3.Lerp(targetPos, startPos, progress);
@@ -350,10 +381,12 @@ public class EnemyScript : MonoBehaviour
         isAttacking = false;
     }
 
-    //player stats and healthh
 
+
+    // damage / health
     public void TakeDamage(float damage)
     {
+
         if (isDead)
         {
             return;
@@ -375,7 +408,6 @@ public class EnemyScript : MonoBehaviour
 
         squishRoutine = StartCoroutine(SquishEffect());
 
-        Debug.Log("Enemy took " + damage + " damage. HP: " + currentHealth);
 
         DamagePopupManager.Instance.SpawnDamagePopup(
             damage,
@@ -392,14 +424,16 @@ public class EnemyScript : MonoBehaviour
         }
     }
 
+
+
     private IEnumerator Stagger()
     {
         isStaggered = true;
-
         yield return new WaitForSeconds(0.25f);
-
         isStaggered = false;
     }
+
+
 
     private IEnumerator SquishEffect()
     {
@@ -412,6 +446,7 @@ public class EnemyScript : MonoBehaviour
             originalScale.y * 0.75f,
             originalScale.z * 1.15f
         );
+
 
         Vector3 stretch = new Vector3(
             originalScale.x * 0.9f,
@@ -426,7 +461,6 @@ public class EnemyScript : MonoBehaviour
         if (Time.unscaledTime - lastSquishTime > 0.06f)
         {
             transform.localScale = stretch;
-
             yield return new WaitForSecondsRealtime(0.08f);
         }
 
@@ -435,9 +469,14 @@ public class EnemyScript : MonoBehaviour
         squishRoutine = null;
     }
 
+
+
     private void Die()
     {
-        if (isDead) return;
+        if (isDead)
+        {
+            return;
+        }
 
         isDead = true;
 
@@ -446,12 +485,14 @@ public class EnemyScript : MonoBehaviour
 
         if (controlledByBoss)
         {
-            gameObject.SetActive(false); // instead of Destroy
+            gameObject.SetActive(false);
             return;
         }
 
         Destroy(gameObject, 0.05f);
     }
+
+
 
     public bool IsDead()
     {
@@ -459,6 +500,8 @@ public class EnemyScript : MonoBehaviour
     }
 
 
+
+    // knockback
     public void ApplyKnockback(Vector3 dir, float force)
     {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -473,6 +516,8 @@ public class EnemyScript : MonoBehaviour
         StartCoroutine(KnockbackMove(dir, force));
     }
 
+
+
     private IEnumerator KnockbackMove(Vector3 dir, float force)
     {
         float t = 0.15f;
@@ -480,18 +525,21 @@ public class EnemyScript : MonoBehaviour
         while (t > 0f)
         {
             t -= Time.deltaTime;
-
             transform.position += dir.normalized * force * Time.deltaTime;
-
             yield return null;
         }
     }
+
+
 
     public void ForceStopMovement()
     {
         StopAllCoroutines();
     }
 
+
+
+    // vfx
     private void PlayDamageVFX()
     {
         if (damageVFX == null)
@@ -499,12 +547,7 @@ public class EnemyScript : MonoBehaviour
             return;
         }
 
-        Transform spawnPoint = transform;
-
-        if (damageVFXPoint != null)
-        {
-            spawnPoint = damageVFXPoint;
-        }
+        Transform spawnPoint = damageVFXPoint != null ? damageVFXPoint : transform;
 
         GameObject vfx = Instantiate(
             damageVFX,
