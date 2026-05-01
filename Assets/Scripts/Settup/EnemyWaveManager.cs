@@ -8,12 +8,50 @@ public class EnemyWaveManager : MonoBehaviour
     [Header("enemies")]
     [SerializeField] private GameObject normalEnemyPrefab;
     [SerializeField] private GameObject specialEnemyPrefab;
+
     [Header("boss")]
     [SerializeField] private GameObject bossEnemyPrefab;
+
+
 
     [Header("fx")]
     [SerializeField] private GameObject spawnParticlePrefab;
     [SerializeField] private float particleDestroyTime = 2f;
+
+
+
+    [Header("ui")]
+    [SerializeField] private TextMeshProUGUI waveText;
+
+
+
+    [Header("intro")]
+    [SerializeField] private GameObject startScreen;
+    [SerializeField] private float firstWaveDelay = 1f;
+
+
+
+    [Header("settings")]
+    [SerializeField] private float timeBetweenWaves = 2f;
+
+
+
+    [Header("death settings")]
+    [SerializeField] private float deathDelay = 2f;
+
+
+
+    // runtime tracking
+    private List<GameObject> aliveEnemies = new List<GameObject>();
+
+    private bool playerDied;
+    private PlayerStats playerStats;
+
+    private Coroutine deathRoutine;
+
+
+
+    // wave spawn sets
 
     [Header("wave 1 spawns")]
     [SerializeField] private Transform[] wave1NormalSpawns;
@@ -27,9 +65,12 @@ public class EnemyWaveManager : MonoBehaviour
     [SerializeField] private Transform[] wave3NormalSpawns;
     [SerializeField] private Transform[] wave3SpecialSpawns;
 
+
+
     [Header("boss wave spawns")]
     [SerializeField] private Transform[] bossWaveNormalSpawns;
     [SerializeField] private Transform[] bossWaveSpecialSpawns;
+
     [Header("boss wave 1 spawns")]
     [SerializeField] private Transform[] wave1BossSpawns;
 
@@ -42,24 +83,7 @@ public class EnemyWaveManager : MonoBehaviour
     [Header("boss final wave spawns")]
     [SerializeField] private Transform[] bossWaveBossSpawns;
 
-    [Header("ui")]
-    [SerializeField] private TextMeshProUGUI waveText;
 
-    [Header("intro")]
-    [SerializeField] private GameObject startScreen;
-    [SerializeField] private float firstWaveDelay = 1f;
-
-    [Header("settings")]
-    [SerializeField] private float timeBetweenWaves = 2f;
-
-    private List<GameObject> aliveEnemies = new List<GameObject>();
-
-    private bool playerDied;
-    private PlayerStats playerStats;
-
-    [Header("death settings")]
-    [SerializeField] private float deathDelay = 2f;
-    private Coroutine deathRoutine;
 
     private void Start()
     {
@@ -71,22 +95,28 @@ public class EnemyWaveManager : MonoBehaviour
         playerStats = FindFirstObjectByType<PlayerStats>();
     }
 
+
+
     public void OnPlayerDied()
     {
         playerDied = true;
     }
 
+
+
     public void BeginWaves()
     {
         if (startScreen != null)
         {
-            //startScreen.SetActive(false);
+            // startScreen.SetActive(false);
         }
 
         StartCoroutine(WaveLoop());
     }
 
 
+
+    // handles external death trigger (during waves)
     private bool CheckDeathEarly()
     {
         if (!playerDied)
@@ -101,6 +131,8 @@ public class EnemyWaveManager : MonoBehaviour
 
         return true;
     }
+
+
 
     private IEnumerator HandleDeathSequence()
     {
@@ -122,9 +154,12 @@ public class EnemyWaveManager : MonoBehaviour
         {
             intro.ReturnToIntro();
         }
+
         playerDied = false;
         deathRoutine = null;
     }
+
+
 
     private IEnumerator WaveLoop()
     {
@@ -149,10 +184,11 @@ public class EnemyWaveManager : MonoBehaviour
             ClearAllEnemies();
             playerStats.Revive();
             playerDied = false;
-            //playerStats.ResetPlayer();
 
             yield break;
         }
+
+
 
         yield return StartCoroutine(ShowWaveText("Wave 2"));
 
@@ -177,6 +213,8 @@ public class EnemyWaveManager : MonoBehaviour
             yield break;
         }
 
+
+
         yield return StartCoroutine(ShowWaveText("Wave 3"));
 
         SpawnWave(wave3NormalSpawns, wave3SpecialSpawns, wave3BossSpawns);
@@ -199,6 +237,8 @@ public class EnemyWaveManager : MonoBehaviour
 
             yield break;
         }
+
+
 
         yield return StartCoroutine(ShowWaveText("Boss Battle"));
 
@@ -223,16 +263,15 @@ public class EnemyWaveManager : MonoBehaviour
             yield break;
         }
 
-        playerDied = false;
-        deathRoutine = null;
+
+
         yield return StartCoroutine(ShowWaveText("You Win"));
 
-       ClearAllEnemies();
+        ClearAllEnemies();
 
         if (playerStats != null)
         {
             playerStats.Revive();
-            playerDied = false;
         }
 
         CameraIntroSequence finalIntro = FindFirstObjectByType<CameraIntroSequence>();
@@ -242,6 +281,8 @@ public class EnemyWaveManager : MonoBehaviour
             finalIntro.ReturnToIntro();
         }
     }
+
+
 
     private void SpawnWave(Transform[] normalSpawns, Transform[] specialSpawns, Transform[] bossSpawns = null)
     {
@@ -279,6 +320,8 @@ public class EnemyWaveManager : MonoBehaviour
         }
     }
 
+
+
     private void SpawnEnemy(GameObject prefab, Transform spawnPoint)
     {
         if (prefab == null)
@@ -312,6 +355,8 @@ public class EnemyWaveManager : MonoBehaviour
         aliveEnemies.Add(enemy);
     }
 
+
+
     private IEnumerator WaitForWaveClear()
     {
         while (true)
@@ -334,6 +379,8 @@ public class EnemyWaveManager : MonoBehaviour
         yield return new WaitForSeconds(timeBetweenWaves);
     }
 
+
+
     private IEnumerator ShowWaveText(string message)
     {
         if (waveText == null)
@@ -346,30 +393,30 @@ public class EnemyWaveManager : MonoBehaviour
 
         RectTransform rect = waveText.GetComponent<RectTransform>();
 
+        rect.localScale = Vector3.zero;
+
         Vector3 originalScale = Vector3.one;
         Vector3 bounceScale = Vector3.one * 1.35f;
 
-        rect.localScale = Vector3.zero;
+
 
         float t = 0f;
 
         while (t < 0.15f)
         {
             t += Time.deltaTime;
-
             rect.localScale = Vector3.Lerp(Vector3.zero, bounceScale, t / 0.15f);
-
             yield return null;
         }
+
+
 
         t = 0f;
 
         while (t < 0.12f)
         {
             t += Time.deltaTime;
-
             rect.localScale = Vector3.Lerp(bounceScale, originalScale, t / 0.12f);
-
             yield return null;
         }
 
@@ -380,14 +427,14 @@ public class EnemyWaveManager : MonoBehaviour
         waveText.gameObject.SetActive(false);
     }
 
+
+
     private void ClearAllEnemies()
     {
-        Debug.Log("Clearing enemies");
         for (int i = aliveEnemies.Count - 1; i >= 0; i--)
         {
             if (aliveEnemies[i] != null)
             {
-                Debug.Log("Destroy enemy");
                 Destroy(aliveEnemies[i]);
             }
         }

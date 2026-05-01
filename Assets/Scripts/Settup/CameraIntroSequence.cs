@@ -8,29 +8,39 @@ public class CameraIntroSequence : MonoBehaviour
     [SerializeField] private ThirdPersonCamera thirdPersonCamera;
     [SerializeField] private EnemyWaveManager waveManager;
 
+
     [Header("camera points")]
     [SerializeField] private Transform introPoint;
     [SerializeField] private Transform gameplayPoint;
 
-    [Header("ui canvases")]
+
+    [Header("ui")]
     [SerializeField] private GameObject introCanvas;
     [SerializeField] private GameObject gameCanvas;
-    private Vector3 playerStartPosition;
-    private Quaternion playerStartRotation;
+
 
     [Header("movement")]
     [SerializeField] private float moveTime = 3f;
 
+
+
+    private Vector3 playerStartPosition;
+    private Quaternion playerStartRotation;
+
     private bool started;
     private bool returningToIntro;
 
+
+
     private void Start()
     {
+        // disable gameplay camera at boot
         if (thirdPersonCamera != null)
         {
             thirdPersonCamera.enabled = false;
         }
 
+        // store player starting transform (for reset later)
         if (thirdPersonCamera != null && thirdPersonCamera.target != null)
         {
             playerStartPosition = thirdPersonCamera.target.position;
@@ -42,6 +52,7 @@ public class CameraIntroSequence : MonoBehaviour
             gameCanvas.SetActive(false);
         }
 
+        // snap camera to intro position at start
         if (introPoint != null)
         {
             Camera.main.transform.position = introPoint.position;
@@ -49,8 +60,12 @@ public class CameraIntroSequence : MonoBehaviour
         }
     }
 
+
+
     private void Update()
     {
+
+        // keep cursor free while still in menu state
         if (!started)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -58,9 +73,10 @@ public class CameraIntroSequence : MonoBehaviour
         }
     }
 
+
+
     public void StartGame()
     {
-        
         if (started)
         {
             return;
@@ -74,6 +90,8 @@ public class CameraIntroSequence : MonoBehaviour
         StartCoroutine(MoveCameraToGameplay());
     }
 
+
+
     private IEnumerator MoveCameraToGameplay()
     {
         Transform cam = Camera.main.transform;
@@ -85,6 +103,7 @@ public class CameraIntroSequence : MonoBehaviour
         Quaternion endRot = gameplayPoint.rotation;
 
         float t = 0f;
+
 
         while (t < moveTime)
         {
@@ -101,6 +120,7 @@ public class CameraIntroSequence : MonoBehaviour
         cam.position = endPos;
         cam.rotation = endRot;
 
+        // switch into gameplay mode
         if (thirdPersonCamera != null)
         {
             thirdPersonCamera.enabled = true;
@@ -115,7 +135,10 @@ public class CameraIntroSequence : MonoBehaviour
         {
             waveManager.BeginWaves();
         }
+
     }
+
+
 
     public void ReturnToIntro()
     {
@@ -128,6 +151,8 @@ public class CameraIntroSequence : MonoBehaviour
 
         StartCoroutine(MoveCameraBackToIntro());
     }
+
+
 
     private IEnumerator MoveCameraBackToIntro()
     {
@@ -149,11 +174,10 @@ public class CameraIntroSequence : MonoBehaviour
         Vector3 endPos = introPoint.position;
         Quaternion endRot = introPoint.rotation;
 
-        float t = 0f;
 
+        float t = 0f;
         while (t < moveTime)
         {
-            
             t += Time.deltaTime;
 
             float p = Mathf.SmoothStep(0f, 1f, t / moveTime);
@@ -161,22 +185,14 @@ public class CameraIntroSequence : MonoBehaviour
             cam.position = Vector3.Lerp(startPos, endPos, p);
             cam.rotation = Quaternion.Slerp(startRot, endRot, p);
 
-            // if (t >= moveTime * 0.4f)
-            // {
-            //     if (thirdPersonCamera != null && thirdPersonCamera.target != null)
-            //     {
-            //         thirdPersonCamera.target.position = playerStartPosition;
-            //         thirdPersonCamera.target.rotation = playerStartRotation;
-            //     }
-            // }
-
             yield return null;
         }
 
         cam.position = endPos;
         cam.rotation = endRot;
 
-        // small hidden reset window so player teleport is not visible
+
+        // small buffer so player reset isnt visually noticeable
         yield return new WaitForSeconds(0.3f);
 
         if (FindFirstObjectByType<PlayerStats>() != null)
@@ -189,6 +205,7 @@ public class CameraIntroSequence : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+
 
         returningToIntro = false;
         started = false;
