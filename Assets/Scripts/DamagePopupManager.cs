@@ -24,9 +24,11 @@ public class DamagePopupManager : MonoBehaviour
     [SerializeField] private Color weakColor;
     [SerializeField] private Color resColor;
 
+
     [Header("Settings")]
     [SerializeField] private float highDamageThreshold = 20f;
     [SerializeField] private int sortingOrder = 1;
+
 
     public void SpawnDamagePopup(float damage, Transform target, bool isPlayerHit, bool isKill, bool isWeak, bool isRes)
     {
@@ -73,6 +75,7 @@ public class DamagePopupManager : MonoBehaviour
 
         text.sortingOrder = sortingOrder;
 
+
         // weak popup
         if (isWeak)
         {
@@ -90,6 +93,7 @@ public class DamagePopupManager : MonoBehaviour
         {
             text.fontSize *= finalDamage / highDamageThreshold;
         }
+
     }
 
     private void SpawnExtraText(Transform target, string message, Color color)
@@ -102,6 +106,7 @@ public class DamagePopupManager : MonoBehaviour
             target.position.y + randomY,
             target.position.z
         );
+        
 
         GameObject popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
 

@@ -20,7 +20,7 @@ public class DamagePopup : MonoBehaviour
         // cache lifetime
         startLifetime = lifetime;
 
-        // get components
+        //get components
         damageText = GetComponent<TextMeshPro>();
 
         // fallback camera 
@@ -31,6 +31,7 @@ public class DamagePopup : MonoBehaviour
 
         // set text
         damageText.SetText(damageTaken);
+
         damageText.color = color;
         textColor = color;
 
@@ -51,6 +52,7 @@ public class DamagePopup : MonoBehaviour
                 
         }
     }
+
 
     private void LateUpdate()
     {
