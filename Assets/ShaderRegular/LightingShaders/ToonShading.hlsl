@@ -12,7 +12,6 @@ void ToonShading_float(
 
 #ifdef SHADERGRAPH_PREVIEW
 
-    // just something so shader graph doesn't freak out in preview
     celRampOutput = float3(0.5, 0.5, 0.0);
     lightDirection = float3(1.0, 0.0, 0.0);
 
