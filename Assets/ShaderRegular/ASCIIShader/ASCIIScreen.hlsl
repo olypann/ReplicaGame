@@ -17,9 +17,11 @@ void ToonShading_float(
 
 #else
 
-    float3 normal = normalize(normalInput);
 
+    float3 normal = normalize(normalInput);
     float3 result = 0.0;
+
+
 
     // main light setup
     #if SHADOWS_SCREEN
@@ -28,6 +30,8 @@ void ToonShading_float(
         float4 shadowCoord = TransformWorldToShadowCoord(worldPosition);
     #endif
 
+
+    
     Light mainLight;
 
     #if _MAIN_LIGHT_SHADOWS_CASCADE || _MAIN_LIGHT_SHADOWS
@@ -36,7 +40,9 @@ void ToonShading_float(
         mainLight = GetMainLight();
     #endif
 
+
     float ndotlMain = saturate(dot(normal, mainLight.direction));
+
 
     float mainCel = smoothstep(
         celRampOffset,
@@ -48,8 +54,11 @@ void ToonShading_float(
 
     result += mainLight.color * mainCel;
 
-    // extra lights (point + spot stuff)
+
+
+    // extra lights (point / spot etc)
     int lightCount = GetAdditionalLightsCount();
+
 
     for (int i = 0; i < lightCount; i++)
     {
@@ -59,6 +68,7 @@ void ToonShading_float(
 
         float ndotl = saturate(dot(normal, lightDir));
 
+
         // same toon ramp but for extra lights
         float cel = smoothstep(
             celRampOffset,
@@ -66,17 +76,21 @@ void ToonShading_float(
             ndotl
         );
 
-        // distance fade + shadows
+
+        // fade + shadows
         cel *= light.distanceAttenuation;
         cel *= light.shadowAttenuation;
 
         result += light.color * cel;
     }
 
-    // final color with a bit of tint slapped on
+
+
+    // final mix
     celRampOutput = result + celRampTint.rgb;
 
-    // giving back main light direction in case we need it later
+
+    // main light direction for debugging / other effects
     lightDirection = mainLight.direction;
 
 #endif

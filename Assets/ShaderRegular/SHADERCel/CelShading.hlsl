@@ -34,6 +34,7 @@ in float CelRampOffset, out float3 CelRampOutput, out float3 Direction)
         CelRampOutput = light.color * (celRamp + CelRampTinting) ;
         // rimlight direction
         Direction = light.direction;
+        
     #endif
  
 }
