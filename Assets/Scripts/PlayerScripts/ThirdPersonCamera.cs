@@ -137,6 +137,7 @@ public class ThirdPersonCamera : MonoBehaviour
         combat = target.GetComponent<PlayerCombat>();
         movement = target.GetComponent<PlayerMovement>();
 
+
         // setup target blending
         currentTarget = target;
         targetGoal = target;
@@ -227,6 +228,7 @@ public class ThirdPersonCamera : MonoBehaviour
                 targetDistance = sprintDistance;
             }
         }
+        
 
         // smooth distance + height
         distance = Mathf.Lerp(distance, targetDistance, Time.deltaTime * distanceSmooth);
@@ -241,8 +243,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
         Vector3 offset = rotation * new Vector3(0, height, -distance);
 
-        // subtle movement (sway + breathing)
+        // subtle movement (sway+ breathing)
         motionTime += Time.deltaTime;
+
 
         float swayX = Mathf.Sin(motionTime * swaySpeed) * swayAmount;
         float swayY = Mathf.Cos(motionTime * breatheSpeed) * breatheAmount;
@@ -275,6 +278,8 @@ public class ThirdPersonCamera : MonoBehaviour
                 externalImpulse;
         }
 
+
+
         // slight overshoot based on movement
         Vector3 frameVel = (transform.position - lastPosition) / Time.deltaTime;
         Vector3 overshoot = frameVel * overshootStrength;
@@ -298,6 +303,7 @@ public class ThirdPersonCamera : MonoBehaviour
             basePos,
             Time.deltaTime * smoothSpeed
         );
+
 
         // apply shake at the end so it doesnt get smoothed out
         finalPos += new Vector3(shakeOffset.x, shakeOffset.y, 0f);

@@ -50,10 +50,11 @@ public class WormBossHeadHealth : MonoBehaviour
             boss.NotifyBossHit();
         }
 
-        // how much total damage is currently allowed based on unlocked segments
+        //how much total damage is currently allowed based on unlocked segments
         float maxAllowedDamage = unlockedSegments * segmentHealthValue;
 
         float minHealthAllowed = maxHealth - maxAllowedDamage;
+
 
 
         // can't damage head at all until at least one segment is gone

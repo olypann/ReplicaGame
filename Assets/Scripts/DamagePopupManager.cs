@@ -54,7 +54,6 @@ public class DamagePopupManager : MonoBehaviour
 
         float finalDamage = Mathf.FloorToInt(damage);
 
-        // base color
         Color color = isPlayerHit ? playerHitColor : enemyHitColor;
 
         // high damage override
@@ -63,7 +62,7 @@ public class DamagePopupManager : MonoBehaviour
             color = highDamageColor;
         }
 
-        // kill text
+        //kill text
         if (isKill)
         {
             popupScript.Setup($"{killText}", Color.red, true);
@@ -76,13 +75,11 @@ public class DamagePopupManager : MonoBehaviour
         text.sortingOrder = sortingOrder;
 
 
-        // weak popup
         if (isWeak)
         {
             SpawnExtraText(target, weakText, weakColor);
         }
 
-        // resist popup
         if (isRes)
         {
             SpawnExtraText(target, resText, resColor);

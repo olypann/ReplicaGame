@@ -60,7 +60,7 @@ public class PlayerPossessedAI : MonoBehaviour
     {
         EnemyScript closest = FindClosestEnemy();
 
-        // default is follow original target ( player body)
+        // default is follow original target
         Vector3 moveTarget = target.position;
 
         // if enemy found, override target
@@ -86,7 +86,7 @@ public class PlayerPossessedAI : MonoBehaviour
 
         else
         {
-            // just following player, don't get too close
+            // just following player
             if (distance < followDistance)
             {
                 return;

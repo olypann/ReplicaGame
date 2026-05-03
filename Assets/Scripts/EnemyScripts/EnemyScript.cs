@@ -383,7 +383,7 @@ public class EnemyScript : MonoBehaviour
 
 
 
-    // damage / health
+    // damage/health
     public void TakeDamage(float damage)
     {
 

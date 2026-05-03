@@ -606,7 +606,7 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-    // camera look
+    //camera look
 
     private void CameraRotation()
     {

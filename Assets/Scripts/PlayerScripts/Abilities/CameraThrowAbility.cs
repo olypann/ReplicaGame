@@ -299,7 +299,7 @@ public class CameraThrowAbility : MonoBehaviour
             yield return null;
         }
 
-        // didn't hit anything, small feedback + delay
+        // didn't hit anything,  small feedback + delay
         if (!hitSomething)
         {
             cam.AddThrowCameraImpulse(-cam.transform.forward * missShake);

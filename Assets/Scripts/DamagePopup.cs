@@ -17,10 +17,8 @@ public class DamagePopup : MonoBehaviour
 
     public void Setup(string damageTaken, Color color, bool effects)
     {
-        // cache lifetime
         startLifetime = lifetime;
 
-        //get components
         damageText = GetComponent<TextMeshPro>();
 
         // fallback camera 
@@ -29,13 +27,11 @@ public class DamagePopup : MonoBehaviour
             cameraTransform = Camera.main.transform;
         }
 
-        // set text
         damageText.SetText(damageTaken);
 
         damageText.color = color;
         textColor = color;
 
-        // effects
         var textEffect = GetComponent<TextEffect>();
 
         if (textEffect != null)
@@ -64,10 +60,9 @@ public class DamagePopup : MonoBehaviour
         // face camera
         transform.LookAt(2 * transform.position - cameraTransform.position);
 
-        // move up
+        //move up
         transform.position += Vector3.up * moveSpeed * Time.deltaTime;
 
-        // lifetime
         lifetime -= Time.deltaTime;
 
         if (lifetime <= 0f)
@@ -81,7 +76,7 @@ public class DamagePopup : MonoBehaviour
             }
         }
 
-        // scale over lifetime
+        //scale over lifetime
         float scaleSpeed = 0.8f;
 
         if (lifetime > startLifetime * 0.5f)

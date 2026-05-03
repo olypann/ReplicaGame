@@ -18,7 +18,7 @@ public class BlobShadowFollow : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, rayDistance))
         {
-            // places projector above the  ground
+            //places projector above the  ground
             transform.position = hit.point + Vector3.up * projectorHeight;
 
             // projects the blob shadpw  downwards

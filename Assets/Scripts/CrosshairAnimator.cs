@@ -42,7 +42,7 @@ public class CrosshairUIAnimator : MonoBehaviour
 
         float progress = timer / animationDuration;
 
-        // rotation
+        //rotation
         float rotation = rotationSpeed * Time.deltaTime;
         root.Rotate(0f, 0f, rotation, Space.Self);
 

@@ -17,9 +17,10 @@ public class WormBossController : MonoBehaviour
     [Header("Target")]
     [SerializeField] private Transform player;
 
-    // index 0 is always the head
+    //index 0 is always the head
     [Header("Body Parts (0 = head)")]
     [SerializeField] private List<Transform> parts = new List<Transform>();
+
 
     // enemy scripts attached to each segment
     [Header("Enemy Scripts on Parts")]

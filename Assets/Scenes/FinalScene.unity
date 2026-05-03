@@ -442,8 +442,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &43690073
 GameObject:
   m_ObjectHideFlags: 0
@@ -1197,8 +1197,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &102773476
 GameObject:
   m_ObjectHideFlags: 0
@@ -1463,8 +1463,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &147251361
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1593,8 +1593,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &196394277
 GameObject:
   m_ObjectHideFlags: 0
@@ -1798,8 +1798,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &233153983
 GameObject:
   m_ObjectHideFlags: 0
@@ -7258,8 +7258,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &314190851
 GameObject:
   m_ObjectHideFlags: 0
@@ -8006,8 +8006,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &338591076
 GameObject:
   m_ObjectHideFlags: 0
@@ -8211,8 +8211,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &373123449 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 33e051a0d02452f488d605fffa305d6a, type: 3}
@@ -8254,8 +8254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &379822681
 GameObject:
   m_ObjectHideFlags: 0
@@ -13236,8 +13236,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &395285481
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13366,8 +13366,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -13617,8 +13617,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &445628157
 GameObject:
   m_ObjectHideFlags: 0
@@ -13883,8 +13883,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &457458938
 GameObject:
   m_ObjectHideFlags: 0
@@ -14166,8 +14166,8 @@ MonoBehaviour:
   cameraTarget: {fileID: 885878451}
   TopClamp: 70
   BottomClamp: -30
-  nearGroundDistance: 3.5
   animator: {fileID: 764297664}
+  nearGroundDistance: 3.5
   dodgeSpeed: 37
   dodgeDuration: 0.06
   doubleTapTime: 0.25
@@ -14551,8 +14551,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &509311156
 GameObject:
   m_ObjectHideFlags: 0
@@ -14889,8 +14889,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &540787560
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15019,8 +15019,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &552596875
 GameObject:
   m_ObjectHideFlags: 0
@@ -15407,8 +15407,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &583108164
 GameObject:
   m_ObjectHideFlags: 0
@@ -15645,8 +15645,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &596592850
 GameObject:
   m_ObjectHideFlags: 0
@@ -15811,6 +15811,11 @@ MonoBehaviour:
   bossEnemyPrefab: {fileID: 230065493785499695, guid: 483fc313ea8a55f40897cb7b42c38f41, type: 3}
   spawnParticlePrefab: {fileID: 8418369078415803894, guid: da5d69da186a2144d8d5cc2b52993e9a, type: 3}
   particleDestroyTime: 2
+  waveText: {fileID: 445628159}
+  startScreen: {fileID: 965539512}
+  firstWaveDelay: 1
+  timeBetweenWaves: 2
+  deathDelay: 2
   wave1NormalSpawns:
   - {fileID: 43690074}
   - {fileID: 871006071}
@@ -15840,11 +15845,6 @@ MonoBehaviour:
   wave3BossSpawns: []
   bossWaveBossSpawns:
   - {fileID: 2027237391}
-  waveText: {fileID: 445628159}
-  startScreen: {fileID: 965539512}
-  firstWaveDelay: 1
-  timeBetweenWaves: 2
-  deathDelay: 2
 --- !u!4 &599312148
 Transform:
   m_ObjectHideFlags: 0
@@ -16290,8 +16290,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &617501047
 GameObject:
   m_ObjectHideFlags: 0
@@ -21259,8 +21259,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &629271364
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21389,8 +21389,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &635290556
 GameObject:
   m_ObjectHideFlags: 0
@@ -21648,8 +21648,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &655062300
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21778,8 +21778,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &662047477
 GameObject:
   m_ObjectHideFlags: 0
@@ -22102,8 +22102,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &684408714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22397,8 +22397,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &734321986 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 33e051a0d02452f488d605fffa305d6a, type: 3}
@@ -22440,8 +22440,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &744403150
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22570,8 +22570,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &752913216
 GameObject:
   m_ObjectHideFlags: 0
@@ -22738,8 +22738,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!95 &764297664 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 8593790735622716679, guid: 42df2cc2f51cdfe4395aad7f81cbbde9, type: 3}
@@ -23142,8 +23142,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &798601201
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23272,8 +23272,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &802115603
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23402,8 +23402,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &806416444
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23532,8 +23532,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &808547834
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -23662,8 +23662,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -24037,8 +24037,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &871006070
 GameObject:
   m_ObjectHideFlags: 0
@@ -24383,8 +24383,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &885878451
 GameObject:
   m_ObjectHideFlags: 0
@@ -29377,8 +29377,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &900845649
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29507,8 +29507,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &909393308
 GameObject:
   m_ObjectHideFlags: 0
@@ -34606,8 +34606,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &949158377
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35150,8 +35150,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1003764720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35280,8 +35280,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1032121193
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35410,8 +35410,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1046282464
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35540,8 +35540,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1047898512
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -35670,8 +35670,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1056343884 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 33e051a0d02452f488d605fffa305d6a, type: 3}
@@ -35713,8 +35713,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1062949237
 GameObject:
   m_ObjectHideFlags: 0
@@ -35951,8 +35951,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1089607944
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -36081,8 +36081,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1092347650
 GameObject:
   m_ObjectHideFlags: 0
@@ -50888,8 +50888,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1129844069
 GameObject:
   m_ObjectHideFlags: 0
@@ -55870,8 +55870,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1158957496
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -55978,8 +55978,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!64 &1158957502
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -61422,8 +61422,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1230224955
 GameObject:
   m_ObjectHideFlags: 0
@@ -66748,8 +66748,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1291923080
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -66878,8 +66878,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1293616238
 GameObject:
   m_ObjectHideFlags: 0
@@ -67116,8 +67116,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1302304931
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67246,8 +67246,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1304650159
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77548,8 +77548,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1367589754
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77665,8 +77665,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1386473114
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -77795,8 +77795,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1387302879
 GameObject:
   m_ObjectHideFlags: 0
@@ -77997,8 +77997,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1393652087
 GameObject:
   m_ObjectHideFlags: 0
@@ -78339,8 +78339,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1429252469
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78469,8 +78469,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1440481488
 GameObject:
   m_ObjectHideFlags: 0
@@ -78587,8 +78587,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1446789378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78717,8 +78717,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1447351867
 GameObject:
   m_ObjectHideFlags: 0
@@ -89062,8 +89062,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1530452016
 GameObject:
   m_ObjectHideFlags: 0
@@ -89545,8 +89545,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1545727374
 GameObject:
   m_ObjectHideFlags: 0
@@ -89804,8 +89804,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1569225046
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -89934,8 +89934,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1572860004
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -90064,8 +90064,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1575188994
 GameObject:
   m_ObjectHideFlags: 0
@@ -90388,8 +90388,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1600762478
 GameObject:
   m_ObjectHideFlags: 0
@@ -91313,8 +91313,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!4 &1706074386 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7415365290538974585, guid: 86cbbce1a42234d4281e95f3d2eb0601, type: 3}
@@ -91908,8 +91908,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1795195898
 GameObject:
   m_ObjectHideFlags: 0
@@ -92074,8 +92074,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1822468927
 GameObject:
   m_ObjectHideFlags: 0
@@ -92576,8 +92576,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1840351962
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -92901,8 +92901,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1847690095
 GameObject:
   m_ObjectHideFlags: 0
@@ -93152,8 +93152,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1864230486
 GameObject:
   m_ObjectHideFlags: 0
@@ -93397,8 +93397,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1904687901
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -93527,8 +93527,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &1941896092
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -93657,8 +93657,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &1948097790
 GameObject:
   m_ObjectHideFlags: 0
@@ -99219,8 +99219,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &2008873223
 GameObject:
   m_ObjectHideFlags: 0
@@ -104545,8 +104545,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &2047300027
 GameObject:
   m_ObjectHideFlags: 0
@@ -114986,8 +114986,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1001 &2135562448
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -115116,8 +115116,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snowComputeShader: {fileID: 7200000, guid: a0d1c4d16f356f647a2793fd48b43b11, type: 3}
   snowRT: {fileID: 0}
-  colorValueToAdd: 0.08
   resolution: 512
+  colorValueToAdd: 0.08
 --- !u!1 &2146464829
 GameObject:
   m_ObjectHideFlags: 0

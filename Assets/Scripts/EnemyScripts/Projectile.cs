@@ -31,7 +31,7 @@ public class Projectile : MonoBehaviour
     {
         CameraEntity cam = other.GetComponentInParent<CameraEntity>();
 
-        // only care if we hit something that actually belongs to the camera system
+        // only care if  hit something that actually belongs to the camera system
         if (cam == null)
         {
             return;
@@ -39,7 +39,7 @@ public class Projectile : MonoBehaviour
 
 
 
-        // different projectile types map to different camera effects
+        //different projectile types map to different camera effects
         if (attackType == 0)
         {
             cam.HitRotate(direction);

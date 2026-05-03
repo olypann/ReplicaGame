@@ -324,7 +324,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 43f0f884312c4234f862de2ce74f9cdb, type: 2}
+  - {fileID: 2100000, guid: 3787961d8ac831f498d8e4e57223d8f6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -416,10 +416,10 @@ MonoBehaviour:
   aggroRadius: 10
   patrolRadius: 6
   patrolChangeTime: 3
-  uiSmoothSpeed: 8
   damageVFX: {fileID: 0}
   damageVFXPoint: {fileID: 0}
   damageVFXLife: 1.5
+  uiSmoothSpeed: 8
 --- !u!114 &4425284350100676398
 MonoBehaviour:
   m_ObjectHideFlags: 0
